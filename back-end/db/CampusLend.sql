@@ -554,9 +554,8 @@ COMMENT ON COLUMN audit.previous_data IS 'Record state before change (JSON forma
 COMMENT ON COLUMN audit.new_data IS 'Record state after change (JSON format)';
 
 
--- ============================================================================
+
 -- DATABASE VIEWS
--- ============================================================================
 
 -- Available computers for loan/reservation
 CREATE OR REPLACE VIEW v_computers_available AS
