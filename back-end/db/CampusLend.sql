@@ -273,7 +273,6 @@ COMMENT ON TABLE student IS 'Registered students who can reserve rooms or reques
 COMMENT ON COLUMN student.academic_status_id IS 'Foreign key to academic_status_type table';
 COMMENT ON COLUMN student.pending_fines IS 'Total accumulated unpaid fines (calculated field)';
 
-
 -- Room (Study and work spaces)
 CREATE TABLE room (
                       room_id                  UUID              PRIMARY KEY DEFAULT gen_random_uuid(),
