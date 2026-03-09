@@ -730,3 +730,4 @@ CREATE INDEX idx_active_loans_overdue ON loan(student_id, expected_return_date)
     WHERE status_id IN (1, 3);  -- ACTIVE or OVERDUE
 
 
+
