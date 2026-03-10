@@ -8,9 +8,9 @@ SET TIME ZONE 'UTC';
 
 -- 2. EXTENSIONES
 
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";   -- for gen_random_uuid()
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";  -- UUID alternative
 
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 
 --------------------------
@@ -297,6 +297,7 @@ CREATE TABLE student (
 
 
 
+
 COMMENT ON TABLE  student               IS 'Registered students who can reserve rooms or request equipment loans';
 COMMENT ON COLUMN student.pending_fines IS 'Total accumulated unpaid fines (recalculated by trigger)';
 
@@ -328,6 +329,8 @@ COMMENT ON COLUMN professor.pending_fines    IS 'Total unpaid fines — conditio
 
 
 -- 4.4 SALA
+
+
 CREATE TABLE room (
                       room_id         UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
                       name            VARCHAR(100)  NOT NULL,
