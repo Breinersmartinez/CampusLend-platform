@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusLend — Diagrama de Clases UML</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap');
+
+    :root {
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --surface2:  #1c2333;
+      --border:    #30363d;
+      --border2:   #21262d;
+      --text:      #e6edf3;
+      --muted:     #8b949e;
+      --faint:     #3d444d;
+
+      /* class header palette */
+      --h-abstract: #2d1f6e;
+      --h-iface:    #0d4a2e;
+      --h-entity:   #1a2d52;
+      --h-student:  #1a4a26;
+      --h-prof:     #3b1a52;
+      --h-emp:      #1a3a5c;
+      --h-room:     #4a3010;
+      --h-comp:     #4a1030;
+      --h-res:      #0d3a4a;
+      --h-loan:     #0d4040;
+      --h-fine:     #4a1010;
+      --h-audit:    #282828;
+      --h-svc:      #0d3a20;
+      --h-ctrl:     #1f3a0d;
+      --h-auth:     #3a0d3a;
+      --h-dto:      #2a2a0d;
+
+      /* accents */
+      --acc-inh:  #58a6ff;
+      --acc-impl: #3fb950;
+      --acc-comp: #f85149;
+      --acc-aggr: #d29922;
+      --acc-assoc:#79c0ff;
+      --acc-dep:  #a371f7;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      background: var(--bg);
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      position: fixed; top:0; left:0; right:0; z-index:100;
+      height: 52px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 20px;
+      gap: 16px;
+    }
+    .topbar-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 0.95rem;
+      color: var(--text); letter-spacing: -0.3px;
+    }
+    .topbar-sub {
+      font-size: 0.65rem; color: var(--muted);
+    }
+    .topbar-sep { width:1px; height:24px; background: var(--border); }
+
+    /* ── Legend pills ── */
+    .legend { display:flex; gap:10px; flex-wrap:wrap; margin-left:auto; }
+    .leg {
+      display:flex; align-items:center; gap:5px;
+      font-size: 0.6rem; color: var(--muted);
+      padding: 3px 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+    .leg-line { width:22px; height:2px; border-radius:2px; }
+    .leg-dash { width:22px; height:0; border-top:2px dashed; }
+
+    /* ── Controls ── */
+    .controls {
+      position: fixed; bottom:20px; right:20px; z-index:100;
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .ctrl-btn {
+      width:36px; height:36px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1rem; font-family: 'Syne', sans-serif; font-weight:700;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .ctrl-btn:hover { background: var(--surface2); border-color: var(--acc-assoc); }
+
+    /* ── Canvas wrapper ── */
+    #canvas-wrap {
+      position: fixed; top:52px; left:0; right:0; bottom:0;
+      overflow: hidden; cursor: grab;
+    }
+    #canvas-wrap:active { cursor: grabbing; }
+
+    svg {
+      display: block;
+      transform-origin: 0 0;
+    }
+
+    /* ── Class box base ── */
+    .cls-wrap { cursor: default; }
+
+    .cls-bg {
+      fill: var(--surface);
+      stroke: var(--border);
+      stroke-width: 1;
+    }
+    .cls-bg-abstract { fill:#1a1630; stroke:#4a3a9e; }
+    .cls-bg-iface    { fill:#0d1f18; stroke:#2ea043; }
+    .cls-bg-entity   { stroke:#2d4a8a; }
+    .cls-bg-student  { stroke:#2a6e3a; }
+    .cls-bg-prof     { stroke:#7a3a9e; }
+    .cls-bg-emp      { stroke:#2a5a8e; }
+    .cls-bg-room     { stroke:#8e6a20; }
+    .cls-bg-comp-eq  { stroke:#8e203a; }
+    .cls-bg-res      { stroke:#205a7a; }
+    .cls-bg-loan     { stroke:#206060; }
+    .cls-bg-fine     { stroke:#8e2020; }
+    .cls-bg-audit    { stroke:#505050; }
+    .cls-bg-svc      { fill:#0a1a10; stroke:#2a6040; }
+    .cls-bg-ctrl     { fill:#0d180a; stroke:#3a6020; }
+    .cls-bg-auth     { fill:#1a0a1a; stroke:#7a3a7a; }
+    .cls-bg-dto      { fill:#18180a; stroke:#6a6a20; }
+
+    .cls-hdr { rx:6; }
+    .cls-hdr-abstract { fill: var(--h-abstract); }
+    .cls-hdr-iface    { fill: var(--h-iface); }
+    .cls-hdr-entity   { fill: var(--h-entity); }
+    .cls-hdr-student  { fill: var(--h-student); }
+    .cls-hdr-prof     { fill: var(--h-prof); }
+    .cls-hdr-emp      { fill: var(--h-emp); }
+    .cls-hdr-room     { fill: var(--h-room); }
+    .cls-hdr-comp-eq  { fill: var(--h-comp); }
+    .cls-hdr-res      { fill: var(--h-res); }
+    .cls-hdr-loan     { fill: var(--h-loan); }
+    .cls-hdr-fine     { fill: var(--h-fine); }
+    .cls-hdr-audit    { fill: var(--h-audit); }
+    .cls-hdr-svc      { fill: var(--h-svc); }
+    .cls-hdr-ctrl     { fill: var(--h-ctrl); }
+    .cls-hdr-auth     { fill: var(--h-auth); }
+    .cls-hdr-dto      { fill: var(--h-dto); }
+
+    .stereo { font-size:8px; fill:#a0aab8; font-weight:400; }
+    .cls-name { font-size:11.5px; font-weight:700; fill:#e6edf3; font-family:'Syne',sans-serif; }
+    .cls-name-ital { font-style:italic; }
+    .sect-lbl { font-size:7.5px; fill:#6e7a8a; font-weight:600; letter-spacing:1px; text-transform:uppercase; }
+    .attr-line { font-size:8.5px; fill:#c9d1d9; }
+    .vis-priv { fill:#f85149; font-weight:700; }
+    .vis-prot { fill:#d29922; font-weight:700; }
+    .vis-pub  { fill:#3fb950; font-weight:700; }
+    .vis-pkg  { fill:#79c0ff; font-weight:700; }
+    .divider  { stroke: var(--border); stroke-width:0.8; }
+    .sect-div { stroke:#2a3040; stroke-width:0.6; stroke-dasharray:3,3; }
+
+    /* ── Relationship lines ── */
+    .rel { fill:none; }
+    .r-inh  { stroke: var(--acc-inh);  stroke-width:1.8; }
+    .r-impl { stroke: var(--acc-impl); stroke-width:1.5; stroke-dasharray:7,4; }
+    .r-comp { stroke: var(--acc-comp); stroke-width:1.6; }
+    .r-aggr { stroke: var(--acc-aggr); stroke-width:1.5; }
+    .r-assoc{ stroke: var(--acc-assoc);stroke-width:1.3; }
+    .r-dep  { stroke: var(--acc-dep);  stroke-width:1.2; stroke-dasharray:5,3; }
+
+    .rlbl { font-size:8.5px; fill:#8b949e; font-family:'JetBrains Mono',monospace; }
+    .rcard{ font-size:9px; fill:#d29922; font-weight:700; font-family:'JetBrains Mono',monospace; }
+    .rname{ font-size:8px; fill:#79c0ff; font-family:'Syne',sans-serif; font-weight:600; }
+
+    /* ── Tooltip ── */
+    .tooltip {
+      position:fixed; pointer-events:none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius:6px; padding:8px 12px;
+      font-size:0.7rem; color:var(--muted);
+      z-index:200; display:none;
+      max-width:240px; line-height:1.6;
+    }
+
+    /* ── Layer labels ── */
+    .layer-bg { fill:#1a1f2a; rx:4; opacity:0.5; }
+    .layer-lbl { font-size:8px; fill:#3d5070; font-family:'Syne',sans-serif; font-weight:700; letter-spacing:2px; text-transform:uppercase; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-title">CampusLend · Diagrama de Clases UML</div>
+    <div class="topbar-sub">SRS IEEE 830 · Spring Boot + PostgreSQL · Universidad Cooperativa de Colombia</div>
+  </div>
+  <div class="topbar-sep"></div>
+  <div class="legend">
+    <div class="leg">
+      <svg width="26" height="10"><line x1="0" y1="5" x2="18" y2="5" stroke="#58a6ff" stroke-width="2"/>
+        <polygon points="16,2 26,5 16,8" fill="none" stroke="#58a6ff" stroke-width="1.5"/></svg>
+      Herencia
+    </div>
+    <div class="leg">
+      <svg width="26" height="10"><line x1="0" y1="5" x2="18" y2="5" stroke="#3fb950" stroke-width="2" stroke-dasharray="5,3"/>
+        <polygon points="16,2 26,5 16,8" fill="none" stroke="#3fb950" stroke-width="1.5"/></svg>
+      Implementa
+    </div>
+    <div class="leg">
+      <svg width="26" height="10"><polygon points="0,5 7,1 14,5 7,9" fill="#f85149"/>
+        <line x1="12" y1="5" x2="26" y2="5" stroke="#f85149" stroke-width="2"/></svg>
+      Composición ◆
+    </div>
+    <div class="leg">
+      <svg width="26" height="10"><polygon points="0,5 7,1 14,5 7,9" fill="none" stroke="#d29922" stroke-width="1.5"/>
+        <line x1="12" y1="5" x2="26" y2="5" stroke="#d29922" stroke-width="2"/></svg>
+      Agregación ◇
+    </div>
+    <div class="leg">
+      <svg width="26" height="10"><line x1="0" y1="5" x2="18" y2="5" stroke="#79c0ff" stroke-width="2"/>
+        <path d="M14,2 L26,5 L14,8" fill="none" stroke="#79c0ff" stroke-width="1.5"/></svg>
+      Asociación
+    </div>
+    <div class="leg">
+      <svg width="26" height="10"><line x1="0" y1="5" x2="18" y2="5" stroke="#a371f7" stroke-width="2" stroke-dasharray="4,3"/>
+        <path d="M14,2 L26,5 L14,8" fill="none" stroke="#a371f7" stroke-width="1.5"/></svg>
+      Dependencia
+    </div>
+    <div class="leg"><span style="color:#f85149">−</span>&nbsp;priv&nbsp;
+      <span style="color:#d29922">◈</span>&nbsp;prot&nbsp;
+      <span style="color:#3fb950">+</span>&nbsp;pub
+    </div>
+  </div>
+</div>
+
+<div id="canvas-wrap">
+  <svg id="diagram" width="2600" height="2400" viewBox="0 0 2600 2400">
+    <defs>
+      <marker id="tri" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto">
+        <polygon points="0,0 11,5 0,10" fill="none" stroke="#58a6ff" stroke-width="1.8"/>
+      </marker>
+      <marker id="tri-g" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto">
+        <polygon points="0,0 11,5 0,10" fill="none" stroke="#3fb950" stroke-width="1.8"/>
+      </marker>
+      <marker id="diam-f" markerWidth="14" markerHeight="10" refX="2" refY="5" orient="auto">
+        <polygon points="0,5 6,0 12,5 6,10" fill="#f85149"/>
+      </marker>
+      <marker id="diam-e" markerWidth="14" markerHeight="10" refX="2" refY="5" orient="auto">
+        <polygon points="0,5 6,0 12,5 6,10" fill="none" stroke="#d29922" stroke-width="1.5"/>
+      </marker>
+      <marker id="arr-b" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+        <path d="M0,1 L9,5 L0,9" fill="none" stroke="#79c0ff" stroke-width="1.5"/>
+      </marker>
+      <marker id="arr-p" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+        <path d="M0,1 L9,5 L0,9" fill="none" stroke="#a371f7" stroke-width="1.5"/>
+      </marker>
+      <filter id="glow">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="shadow">
+        <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity="0.5"/>
+      </filter>
+    </defs>
+
+    <!-- ═══════════════════════════════════════════════════════
+         LAYER BACKGROUND BANDS
+    ═══════════════════════════════════════════════════════ -->
+    <rect x="20" y="80" width="2560" height="12" class="layer-bg"/>
+    <text x="34" y="90" class="layer-lbl">Capa Abstracta / Interfaces</text>
+
+    <rect x="20" y="310" width="2560" height="12" class="layer-bg"/>
+    <text x="34" y="320" class="layer-lbl">Capa Modelo — Entidades de Dominio</text>
+
+    <rect x="20" y="730" width="2560" height="12" class="layer-bg"/>
+    <text x="34" y="740" class="layer-lbl">Capa Transaccional</text>
+
+    <rect x="20" y="1170" width="2560" height="12" class="layer-bg"/>
+    <text x="34" y="1180" class="layer-lbl">Capa Servicios (Business Logic)</text>
+
+    <rect x="20" y="1510" width="2560" height="12" class="layer-bg"/>
+    <text x="34" y="1520" class="layer-lbl">Capa Controladores (REST API)</text>
+
+    <rect x="20" y="1740" width="2560" height="12" class="layer-bg"/>
+    <text x="34" y="1750" class="layer-lbl">Capa Seguridad / DTOs / Enumeraciones</text>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         LAYER 1 — ABSTRACT + INTERFACES
+    ═══════════════════════════════════════════════════════ -->
+
+    <!-- «abstract» Usuario -->
+    <g filter="url(#shadow)">
+      <rect x="840" y="100" width="220" height="190" rx="7" class="cls-bg cls-bg-abstract"/>
+      <rect x="840" y="100" width="220" height="44" rx="7" class="cls-hdr cls-hdr-abstract"/>
+      <rect x="840" y="130" width="220" height="14" class="cls-hdr-abstract"/>
+      <text x="950" y="116" text-anchor="middle" class="stereo">«abstract»</text>
+      <text x="950" y="133" text-anchor="middle" class="cls-name cls-name-ital">Usuario</text>
+      <line x1="840" y1="144" x2="1060" y2="144" class="divider"/>
+      <text x="852" y="157" class="sect-lbl">atributos</text>
+      <text x="856" y="170" class="attr-line"><tspan class="vis-priv">−</tspan> id : UUID</text>
+      <text x="856" y="183" class="attr-line"><tspan class="vis-priv">−</tspan> nombre : String</text>
+      <text x="856" y="196" class="attr-line"><tspan class="vis-priv">−</tspan> correoInstitucional : String</text>
+      <text x="856" y="209" class="attr-line"><tspan class="vis-priv">−</tspan> passwordHash : String</text>
+      <line x1="840" y1="216" x2="1060" y2="216" class="divider"/>
+      <text x="852" y="229" class="sect-lbl">métodos</text>
+      <text x="856" y="242" class="attr-line"><tspan class="vis-pub">+</tspan> login() : boolean</text>
+      <text x="856" y="255" class="attr-line"><tspan class="vis-pub">+</tspan> logout() : void</text>
+      <text x="856" y="268" class="attr-line"><tspan class="vis-prot">◈</tspan> validate() : boolean</text>
+      <text x="856" y="281" class="attr-line"><tspan class="vis-prot">◈</tspan> hashPassword() : void</text>
+    </g>
+
+    <!-- «interface» ICrudService<T,ID> -->
+    <g filter="url(#shadow)">
+      <rect x="1180" y="100" width="230" height="158" rx="7" class="cls-bg cls-bg-iface"/>
+      <rect x="1180" y="100" width="230" height="44" rx="7" class="cls-hdr cls-hdr-iface"/>
+      <rect x="1180" y="130" width="230" height="14" class="cls-hdr-iface"/>
+      <text x="1295" y="116" text-anchor="middle" class="stereo">«interface»</text>
+      <text x="1295" y="133" text-anchor="middle" class="cls-name">ICrudService&lt;T,ID&gt;</text>
+      <line x1="1180" y1="144" x2="1410" y2="144" class="divider"/>
+      <text x="1192" y="157" class="sect-lbl">métodos</text>
+      <text x="1196" y="170" class="attr-line"><tspan class="vis-pub">+</tspan> save(entity:T) : T</text>
+      <text x="1196" y="183" class="attr-line"><tspan class="vis-pub">+</tspan> findById(id:ID) : Optional&lt;T&gt;</text>
+      <text x="1196" y="196" class="attr-line"><tspan class="vis-pub">+</tspan> findAll(filters) : List&lt;T&gt;</text>
+      <text x="1196" y="209" class="attr-line"><tspan class="vis-pub">+</tspan> update(id:ID, t:T) : T</text>
+      <text x="1196" y="222" class="attr-line"><tspan class="vis-pub">+</tspan> deactivate(id:ID) : void</text>
+      <text x="1196" y="235" class="attr-line"><tspan class="vis-pub">+</tspan> existsById(id:ID) : boolean</text>
+      <text x="1196" y="248" class="attr-line"><tspan class="vis-pub">+</tspan> countActive() : long</text>
+    </g>
+
+    <!-- «interface» IReservable -->
+    <g filter="url(#shadow)">
+      <rect x="1560" y="100" width="215" height="145" rx="7" class="cls-bg cls-bg-iface"/>
+      <rect x="1560" y="100" width="215" height="44" rx="7" class="cls-hdr cls-hdr-iface"/>
+      <rect x="1560" y="130" width="215" height="14" class="cls-hdr-iface"/>
+      <text x="1667" y="116" text-anchor="middle" class="stereo">«interface»</text>
+      <text x="1667" y="133" text-anchor="middle" class="cls-name">IReservable</text>
+      <line x1="1560" y1="144" x2="1775" y2="144" class="divider"/>
+      <text x="1572" y="157" class="sect-lbl">métodos</text>
+      <text x="1576" y="170" class="attr-line"><tspan class="vis-pub">+</tspan> isAvailable() : boolean</text>
+      <text x="1576" y="183" class="attr-line"><tspan class="vis-pub">+</tspan> getAvailableSlots() : List</text>
+      <text x="1576" y="196" class="attr-line"><tspan class="vis-pub">+</tspan> reserve(r:Reserva) : void</text>
+      <text x="1576" y="209" class="attr-line"><tspan class="vis-pub">+</tspan> hasConflict(r:Reserva) : bool</text>
+      <text x="1576" y="222" class="attr-line"><tspan class="vis-pub">+</tspan> getActiveReservations() : List</text>
+    </g>
+
+    <!-- «interface» IAuditable -->
+    <g filter="url(#shadow)">
+      <rect x="1910" y="100" width="200" height="132" rx="7" class="cls-bg cls-bg-iface"/>
+      <rect x="1910" y="100" width="200" height="44" rx="7" class="cls-hdr cls-hdr-iface"/>
+      <rect x="1910" y="130" width="200" height="14" class="cls-hdr-iface"/>
+      <text x="2010" y="116" text-anchor="middle" class="stereo">«interface»</text>
+      <text x="2010" y="133" text-anchor="middle" class="cls-name">IAuditable</text>
+      <line x1="1910" y1="144" x2="2110" y2="144" class="divider"/>
+      <text x="1922" y="157" class="sect-lbl">métodos</text>
+      <text x="1926" y="170" class="attr-line"><tspan class="vis-pub">+</tspan> logAction(action) : void</text>
+      <text x="1926" y="183" class="attr-line"><tspan class="vis-pub">+</tspan> getAuditHistory() : List</text>
+      <text x="1926" y="196" class="attr-line"><tspan class="vis-pub">+</tspan> getLastModified() : DateTime</text>
+      <text x="1926" y="209" class="attr-line"><tspan class="vis-pub">+</tspan> getModifiedBy() : UUID</text>
+      <text x="1926" y="222" class="attr-line"><tspan class="vis-pub">+</tspan> serialize() : JsonNode</text>
+    </g>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         LAYER 2 — DOMAIN ENTITIES
+    ═══════════════════════════════════════════════════════ -->
+
+    <!-- Empleado -->
+    <g filter="url(#shadow)">
+      <rect x="40" y="330" width="230" height="358" rx="7" class="cls-bg cls-bg-emp"/>
+      <rect x="40" y="330" width="230" height="44" rx="7" class="cls-hdr cls-hdr-emp"/>
+      <rect x="40" y="362" width="230" height="14" class="cls-hdr-emp"/>
+      <text x="155" y="346" text-anchor="middle" class="stereo">«entity»</text>
+      <text x="155" y="363" text-anchor="middle" class="cls-name">Empleado</text>
+      <line x1="40" y1="376" x2="270" y2="376" class="divider"/>
+      <text x="52" y="389" class="sect-lbl">atributos propios</text>
+      <text x="56" y="403" class="attr-line"><tspan class="vis-priv">−</tspan> cardId : String</text>
+      <text x="56" y="416" class="attr-line"><tspan class="vis-priv">−</tspan> role : RoleType</text>
+      <text x="56" y="429" class="attr-line"><tspan class="vis-priv">−</tspan> department : String</text>
+      <text x="56" y="442" class="attr-line"><tspan class="vis-priv">−</tspan> phone : String</text>
+      <text x="56" y="455" class="attr-line"><tspan class="vis-priv">−</tspan> status : EmployeeStatus</text>
+      <text x="56" y="468" class="attr-line"><tspan class="vis-priv">−</tspan> hireDate : LocalDate</text>
+      <text x="56" y="481" class="attr-line"><tspan class="vis-priv">−</tspan> createdAt : LocalDateTime</text>
+      <text x="56" y="494" class="attr-line"><tspan class="vis-priv">−</tspan> updatedAt : LocalDateTime</text>
+      <line x1="40" y1="501" x2="270" y2="501" class="divider"/>
+      <text x="52" y="514" class="sect-lbl">métodos</text>
+      <text x="56" y="528" class="attr-line"><tspan class="vis-pub">+</tspan> register(dto) : Empleado</text>
+      <text x="56" y="541" class="attr-line"><tspan class="vis-pub">+</tspan> update(id, dto) : Empleado</text>
+      <text x="56" y="554" class="attr-line"><tspan class="vis-pub">+</tspan> deactivate(id) : void</text>
+      <text x="56" y="567" class="attr-line"><tspan class="vis-pub">+</tspan> findByEmail(e) : Empleado</text>
+      <text x="56" y="580" class="attr-line"><tspan class="vis-pub">+</tspan> findById(id) : Empleado</text>
+      <text x="56" y="593" class="attr-line"><tspan class="vis-pub">+</tspan> isLastAdmin() : boolean</text>
+      <text x="56" y="606" class="attr-line"><tspan class="vis-pub">+</tspan> hasRole(r:RoleType) : boolean</text>
+      <text x="56" y="619" class="attr-line"><tspan class="vis-pub">+</tspan> listAll(filters) : List</text>
+      <text x="56" y="632" class="attr-line"><tspan class="vis-priv">−</tspan> validateEmail() : void</text>
+      <text x="56" y="645" class="attr-line"><tspan class="vis-prot">◈</tspan> validate() : boolean</text>
+      <text x="56" y="658" class="attr-line"><tspan class="vis-prot">◈</tspan> hashPassword() : void</text>
+      <text x="56" y="671" class="attr-line"><tspan class="vis-priv">−</tspan> auditChange(action) : void</text>
+      <text x="56" y="684" class="attr-line"><tspan class="vis-pub">+</tspan> getProfile() : EmpleadoDTO</text>
+    </g>
+
+    <!-- Estudiante -->
+    <g filter="url(#shadow)">
+      <rect x="310" y="330" width="235" height="371" rx="7" class="cls-bg cls-bg-student"/>
+      <rect x="310" y="330" width="235" height="44" rx="7" class="cls-hdr cls-hdr-student"/>
+      <rect x="310" y="362" width="235" height="14" class="cls-hdr-student"/>
+      <text x="427" y="346" text-anchor="middle" class="stereo">«entity»</text>
+      <text x="427" y="363" text-anchor="middle" class="cls-name">Estudiante</text>
+      <line x1="310" y1="376" x2="545" y2="376" class="divider"/>
+      <text x="322" y="389" class="sect-lbl">atributos propios</text>
+      <text x="326" y="403" class="attr-line"><tspan class="vis-priv">−</tspan> idCard : String</text>
+      <text x="326" y="416" class="attr-line"><tspan class="vis-priv">−</tspan> academicProgram : String</text>
+      <text x="326" y="429" class="attr-line"><tspan class="vis-priv">−</tspan> semester : int {1..12}</text>
+      <text x="326" y="442" class="attr-line"><tspan class="vis-priv">−</tspan> academicStatus : AcadStatus</text>
+      <text x="326" y="455" class="attr-line"><tspan class="vis-priv">−</tspan> pendingFines : BigDecimal</text>
+      <text x="326" y="468" class="attr-line"><tspan class="vis-priv">−</tspan> createdAt : LocalDateTime</text>
+      <text x="326" y="481" class="attr-line"><tspan class="vis-priv">−</tspan> updatedAt : LocalDateTime</text>
+      <line x1="310" y1="488" x2="545" y2="488" class="divider"/>
+      <text x="322" y="501" class="sect-lbl">métodos</text>
+      <text x="326" y="515" class="attr-line"><tspan class="vis-pub">+</tspan> register(dto) : Estudiante</text>
+      <text x="326" y="528" class="attr-line"><tspan class="vis-pub">+</tspan> update(id, dto) : Estudiante</text>
+      <text x="326" y="541" class="attr-line"><tspan class="vis-pub">+</tspan> deactivate(id) : void</text>
+      <text x="326" y="554" class="attr-line"><tspan class="vis-pub">+</tspan> findByIdCard(n) : Estudiante</text>
+      <text x="326" y="567" class="attr-line"><tspan class="vis-pub">+</tspan> hasActiveLoans() : boolean</text>
+      <text x="326" y="580" class="attr-line"><tspan class="vis-pub">+</tspan> getPendingFines() : BigDecimal</text>
+      <text x="326" y="593" class="attr-line"><tspan class="vis-pub">+</tspan> syncFines() : void</text>
+      <text x="326" y="606" class="attr-line"><tspan class="vis-pub">+</tspan> getReservations() : List</text>
+      <text x="326" y="619" class="attr-line"><tspan class="vis-pub">+</tspan> listAll(filters) : List</text>
+      <text x="326" y="632" class="attr-line"><tspan class="vis-priv">−</tspan> validateEmail() : void</text>
+      <text x="326" y="645" class="attr-line"><tspan class="vis-prot">◈</tspan> validate() : boolean</text>
+      <text x="326" y="658" class="attr-line"><tspan class="vis-prot">◈</tspan> hashPassword() : void</text>
+      <text x="326" y="671" class="attr-line"><tspan class="vis-priv">−</tspan> auditChange(action) : void</text>
+      <text x="326" y="684" class="attr-line"><tspan class="vis-pub">+</tspan> getProfile() : EstudianteDTO</text>
+      <text x="326" y="697" class="attr-line"><tspan class="vis-priv">−</tspan> checkActiveLoans() : void</text>
+    </g>
+
+    <!-- Profesor -->
+    <g filter="url(#shadow)">
+      <rect x="590" y="330" width="240" height="384" rx="7" class="cls-bg cls-bg-prof"/>
+      <rect x="590" y="330" width="240" height="44" rx="7" class="cls-hdr cls-hdr-prof"/>
+      <rect x="590" y="362" width="240" height="14" class="cls-hdr-prof"/>
+      <text x="710" y="346" text-anchor="middle" class="stereo">«entity»</text>
+      <text x="710" y="363" text-anchor="middle" class="cls-name">Profesor</text>
+      <line x1="590" y1="376" x2="830" y2="376" class="divider"/>
+      <text x="602" y="389" class="sect-lbl">atributos propios</text>
+      <text x="606" y="403" class="attr-line"><tspan class="vis-priv">−</tspan> idCard : String</text>
+      <text x="606" y="416" class="attr-line"><tspan class="vis-priv">−</tspan> faculty : String</text>
+      <text x="606" y="429" class="attr-line"><tspan class="vis-priv">−</tspan> academicDepartment : String</text>
+      <text x="606" y="442" class="attr-line"><tspan class="vis-priv">−</tspan> contractType : ContractType</text>
+      <text x="606" y="455" class="attr-line"><tspan class="vis-priv">−</tspan> status : ProfessorStatus</text>
+      <text x="606" y="468" class="attr-line"><tspan class="vis-priv">−</tspan> phone : String</text>
+      <text x="606" y="481" class="attr-line"><tspan class="vis-priv">−</tspan> pendingFines : BigDecimal</text>
+      <text x="606" y="494" class="attr-line"><tspan class="vis-priv">−</tspan> hireDate : LocalDate</text>
+      <text x="606" y="507" class="attr-line"><tspan class="vis-priv">−</tspan> createdAt : LocalDateTime</text>
+      <text x="606" y="520" class="attr-line"><tspan class="vis-priv">−</tspan> updatedAt : LocalDateTime</text>
+      <line x1="590" y1="527" x2="830" y2="527" class="divider"/>
+      <text x="602" y="540" class="sect-lbl">métodos</text>
+      <text x="606" y="554" class="attr-line"><tspan class="vis-pub">+</tspan> register(dto) : Profesor</text>
+      <text x="606" y="567" class="attr-line"><tspan class="vis-pub">+</tspan> update(id, dto) : Profesor</text>
+      <text x="606" y="580" class="attr-line"><tspan class="vis-pub">+</tspan> deactivate(id) : void</text>
+      <text x="606" y="593" class="attr-line"><tspan class="vis-pub">+</tspan> findByIdCard(n) : Profesor</text>
+      <text x="606" y="606" class="attr-line"><tspan class="vis-pub">+</tspan> hasActiveLoans() : boolean</text>
+      <text x="606" y="619" class="attr-line"><tspan class="vis-pub">+</tspan> syncFines() : void</text>
+      <text x="606" y="632" class="attr-line"><tspan class="vis-pub">+</tspan> getPrivilegeLevel() : int</text>
+      <text x="606" y="645" class="attr-line"><tspan class="vis-pub">+</tspan> getReservations() : List</text>
+      <text x="606" y="658" class="attr-line"><tspan class="vis-pub">+</tspan> listAll(filters) : List</text>
+      <text x="606" y="671" class="attr-line"><tspan class="vis-prot">◈</tspan> validate() : boolean</text>
+      <text x="606" y="684" class="attr-line"><tspan class="vis-prot">◈</tspan> hashPassword() : void</text>
+      <text x="606" y="697" class="attr-line"><tspan class="vis-priv">−</tspan> auditChange(action) : void</text>
+      <text x="606" y="710" class="attr-line"><tspan class="vis-pub">+</tspan> getProfile() : ProfesorDTO</text>
+    </g>
+
+    <!-- Sala -->
+    <g filter="url(#shadow)">
+      <rect x="880" y="330" width="240" height="371" rx="7" class="cls-bg cls-bg-room"/>
+      <rect x="880" y="330" width="240" height="44" rx="7" class="cls-hdr cls-hdr-room"/>
+      <rect x="880" y="362" width="240" height="14" class="cls-hdr-room"/>
+      <text x="1000" y="346" text-anchor="middle" class="stereo">«entity»</text>
+      <text x="1000" y="363" text-anchor="middle" class="cls-name">Sala</text>
+      <line x1="880" y1="376" x2="1120" y2="376" class="divider"/>
+      <text x="892" y="389" class="sect-lbl">atributos</text>
+      <text x="896" y="403" class="attr-line"><tspan class="vis-priv">−</tspan> name : String</text>
+      <text x="896" y="416" class="attr-line"><tspan class="vis-priv">−</tspan> building : String</text>
+      <text x="896" y="429" class="attr-line"><tspan class="vis-priv">−</tspan> floor : int {≥0}</text>
+      <text x="896" y="442" class="attr-line"><tspan class="vis-priv">−</tspan> roomNumber : String</text>
+      <text x="896" y="455" class="attr-line"><tspan class="vis-priv">−</tspan> maxCapacity : int {&gt;0}</text>
+      <text x="896" y="468" class="attr-line"><tspan class="vis-priv">−</tspan> openingTime : LocalTime</text>
+      <text x="896" y="481" class="attr-line"><tspan class="vis-priv">−</tspan> closingTime : LocalTime</text>
+      <text x="896" y="494" class="attr-line"><tspan class="vis-priv">−</tspan> status : RoomStatus</text>
+      <text x="896" y="507" class="attr-line"><tspan class="vis-priv">−</tspan> createdAt : LocalDateTime</text>
+      <text x="896" y="520" class="attr-line"><tspan class="vis-priv">−</tspan> updatedAt : LocalDateTime</text>
+      <line x1="880" y1="527" x2="1120" y2="527" class="divider"/>
+      <text x="892" y="540" class="sect-lbl">métodos</text>
+      <text x="896" y="554" class="attr-line"><tspan class="vis-pub">+</tspan> register(dto) : Sala</text>
+      <text x="896" y="567" class="attr-line"><tspan class="vis-pub">+</tspan> update(id, dto) : Sala</text>
+      <text x="896" y="580" class="attr-line"><tspan class="vis-pub">+</tspan> deactivate(id) : void</text>
+      <text x="896" y="593" class="attr-line"><tspan class="vis-pub">+</tspan> findById(id) : Sala</text>
+      <text x="896" y="606" class="attr-line"><tspan class="vis-pub">+</tspan> isAvailable() : boolean</text>
+      <text x="896" y="619" class="attr-line"><tspan class="vis-pub">+</tspan> getAvailableSlots() : List</text>
+      <text x="896" y="632" class="attr-line"><tspan class="vis-pub">+</tspan> hasConflict(r) : boolean</text>
+      <text x="896" y="645" class="attr-line"><tspan class="vis-pub">+</tspan> hasActiveReservations() : bool</text>
+      <text x="896" y="658" class="attr-line"><tspan class="vis-pub">+</tspan> reserve(r:Reserva) : void</text>
+      <text x="896" y="671" class="attr-line"><tspan class="vis-pub">+</tspan> listAll(filters) : List</text>
+      <text x="896" y="684" class="attr-line"><tspan class="vis-prot">◈</tspan> validateUniqueLocation() : void</text>
+      <text x="896" y="697" class="attr-line"><tspan class="vis-priv">−</tspan> auditChange(action) : void</text>
+    </g>
+
+    <!-- Computadora -->
+    <g filter="url(#shadow)">
+      <rect x="1175" y="330" width="245" height="371" rx="7" class="cls-bg cls-bg-comp-eq"/>
+      <rect x="1175" y="330" width="245" height="44" rx="7" class="cls-hdr cls-hdr-comp-eq"/>
+      <rect x="1175" y="362" width="245" height="14" class="cls-hdr-comp-eq"/>
+      <text x="1297" y="346" text-anchor="middle" class="stereo">«entity»</text>
+      <text x="1297" y="363" text-anchor="middle" class="cls-name">Computadora</text>
+      <line x1="1175" y1="376" x2="1420" y2="376" class="divider"/>
+      <text x="1187" y="389" class="sect-lbl">atributos</text>
+      <text x="1191" y="403" class="attr-line"><tspan class="vis-priv">−</tspan> inventoryCode : String</text>
+      <text x="1191" y="416" class="attr-line"><tspan class="vis-priv">−</tspan> model : String</text>
+      <text x="1191" y="429" class="attr-line"><tspan class="vis-priv">−</tspan> brand : String</text>
+      <text x="1191" y="442" class="attr-line"><tspan class="vis-priv">−</tspan> processor : String</text>
+      <text x="1191" y="455" class="attr-line"><tspan class="vis-priv">−</tspan> ramGb : int {&gt;0}</text>
+      <text x="1191" y="468" class="attr-line"><tspan class="vis-priv">−</tspan> storageGb : int {&gt;0}</text>
+      <text x="1191" y="481" class="attr-line"><tspan class="vis-priv">−</tspan> qrCode : String</text>
+      <text x="1191" y="494" class="attr-line"><tspan class="vis-priv">−</tspan> status : ComputerStatus</text>
+      <text x="1191" y="507" class="attr-line"><tspan class="vis-priv">−</tspan> acquisitionDate : LocalDate</text>
+      <text x="1191" y="520" class="attr-line"><tspan class="vis-priv">−</tspan> notes : String</text>
+      <line x1="1175" y1="527" x2="1420" y2="527" class="divider"/>
+      <text x="1187" y="540" class="sect-lbl">métodos</text>
+      <text x="1191" y="554" class="attr-line"><tspan class="vis-pub">+</tspan> register(dto) : Computadora</text>
+      <text x="1191" y="567" class="attr-line"><tspan class="vis-pub">+</tspan> update(id, dto) : Computadora</text>
+      <text x="1191" y="580" class="attr-line"><tspan class="vis-pub">+</tspan> deactivate(id) : void</text>
+      <text x="1191" y="593" class="attr-line"><tspan class="vis-pub">+</tspan> findById(id) : Computadora</text>
+      <text x="1191" y="606" class="attr-line"><tspan class="vis-pub">+</tspan> isAvailable() : boolean</text>
+      <text x="1191" y="619" class="attr-line"><tspan class="vis-pub">+</tspan> hasConflict(r) : boolean</text>
+      <text x="1191" y="632" class="attr-line"><tspan class="vis-pub">+</tspan> markAsInLoan() : void</text>
+      <text x="1191" y="645" class="attr-line"><tspan class="vis-pub">+</tspan> markAsAvailable() : void</text>
+      <text x="1191" y="658" class="attr-line"><tspan class="vis-pub">+</tspan> generateQRCode() : String</text>
+      <text x="1191" y="671" class="attr-line"><tspan class="vis-pub">+</tspan> reserve(r:Reserva) : void</text>
+      <text x="1191" y="684" class="attr-line"><tspan class="vis-pub">+</tspan> listAll(filters) : List</text>
+      <text x="1191" y="697" class="attr-line"><tspan class="vis-priv">−</tspan> auditChange(action) : void</text>
+    </g>
+
+    <!-- SalaEquipamiento (entidad débil – composición de Sala) -->
+    <g filter="url(#shadow)">
+      <rect x="1470" y="330" width="230" height="240" rx="7" class="cls-bg cls-bg-room" style="stroke-dasharray:8,3"/>
+      <rect x="1470" y="330" width="230" height="44" rx="7" class="cls-hdr cls-hdr-room"/>
+      <rect x="1470" y="362" width="230" height="14" class="cls-hdr-room"/>
+      <text x="1585" y="346" text-anchor="middle" class="stereo">«entity»  «weak»</text>
+      <text x="1585" y="363" text-anchor="middle" class="cls-name">SalaEquipamiento</text>
+      <line x1="1470" y1="376" x2="1700" y2="376" class="divider"/>
+      <text x="1482" y="389" class="sect-lbl">atributos</text>
+      <text x="1486" y="403" class="attr-line"><tspan class="vis-priv">−</tspan> equipmentType : EquipType</text>
+      <text x="1486" y="416" class="attr-line"><tspan class="vis-priv">−</tspan> quantity : int {&gt;0}</text>
+      <text x="1486" y="429" class="attr-line"><tspan class="vis-priv">−</tspan> notes : String</text>
+      <text x="1486" y="442" class="attr-line"><tspan class="vis-priv">−</tspan> createdAt : LocalDateTime</text>
+      <line x1="1470" y1="449" x2="1700" y2="449" class="divider"/>
+      <text x="1482" y="462" class="sect-lbl">métodos</text>
+      <text x="1486" y="476" class="attr-line"><tspan class="vis-pub">+</tspan> add(dto) : SalaEquipamiento</text>
+      <text x="1486" y="489" class="attr-line"><tspan class="vis-pub">+</tspan> update(id, dto) : void</text>
+      <text x="1486" y="502" class="attr-line"><tspan class="vis-pub">+</tspan> remove(id) : void</text>
+      <text x="1486" y="515" class="attr-line"><tspan class="vis-pub">+</tspan> getByRoom(roomId) : List</text>
+      <text x="1486" y="528" class="attr-line"><tspan class="vis-pub">+</tspan> getByType(type) : List</text>
+      <text x="1486" y="541" class="attr-line"><tspan class="vis-pub">+</tspan> toDTO() : EquipDTO</text>
+      <text x="1486" y="554" class="attr-line"><tspan class="vis-prot">◈</tspan> validate() : boolean</text>
+      <text x="1486" y="567" class="attr-line"><tspan class="vis-priv">−</tspan> checkUniqueness() : void</text>
+    </g>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         LAYER 3 — TRANSACTIONAL ENTITIES
+    ═══════════════════════════════════════════════════════ -->
+
+    <!-- Reserva -->
+    <g filter="url(#shadow)">
+      <rect x="40" y="750" width="260" height="384" rx="7" class="cls-bg cls-bg-res"/>
+      <rect x="40" y="750" width="260" height="44" rx="7" class="cls-hdr cls-hdr-res"/>
+      <rect x="40" y="782" width="260" height="14" class="cls-hdr-res"/>
+      <text x="170" y="766" text-anchor="middle" class="stereo">«entity»</text>
+      <text x="170" y="783" text-anchor="middle" class="cls-name">Reserva</text>
+      <line x1="40" y1="796" x2="300" y2="796" class="divider"/>
+      <text x="52" y="809" class="sect-lbl">atributos</text>
+      <text x="56" y="823" class="attr-line"><tspan class="vis-priv">−</tspan> requesterType : ReqType</text>
+      <text x="56" y="836" class="attr-line"><tspan class="vis-priv">−</tspan> resourceType : ResourceType</text>
+      <text x="56" y="849" class="attr-line"><tspan class="vis-priv">−</tspan> reservationDate : LocalDate</text>
+      <text x="56" y="862" class="attr-line"><tspan class="vis-priv">−</tspan> startTime : LocalTime</text>
+      <text x="56" y="875" class="attr-line"><tspan class="vis-priv">−</tspan> endTime : LocalTime</text>
+      <text x="56" y="888" class="attr-line"><tspan class="vis-priv">−</tspan> status : ReservationStatus</text>
+      <text x="56" y="901" class="attr-line"><tspan class="vis-priv">−</tspan> cancellationReason : String</text>
+      <text x="56" y="914" class="attr-line"><tspan class="vis-priv">−</tspan> createdAt : LocalDateTime</text>
+      <text x="56" y="927" class="attr-line"><tspan class="vis-priv">−</tspan> updatedAt : LocalDateTime</text>
+      <line x1="40" y1="934" x2="300" y2="934" class="divider"/>
+      <text x="52" y="947" class="sect-lbl">métodos</text>
+      <text x="56" y="961" class="attr-line"><tspan class="vis-pub">+</tspan> create(dto) : Reserva</text>
+      <text x="56" y="974" class="attr-line"><tspan class="vis-pub">+</tspan> cancel(reason) : void</text>
+      <text x="56" y="987" class="attr-line"><tspan class="vis-pub">+</tspan> complete() : void</text>
+      <text x="56" y="1000" class="attr-line"><tspan class="vis-pub">+</tspan> convertToLoan() : Prestamo</text>
+      <text x="56" y="1013" class="attr-line"><tspan class="vis-pub">+</tspan> isActive() : boolean</text>
+      <text x="56" y="1026" class="attr-line"><tspan class="vis-pub">+</tspan> overlaps(r:Reserva) : boolean</text>
+      <text x="56" y="1039" class="attr-line"><tspan class="vis-pub">+</tspan> getByRequester(id) : List</text>
+      <text x="56" y="1052" class="attr-line"><tspan class="vis-pub">+</tspan> getByDate(date) : List</text>
+      <text x="56" y="1065" class="attr-line"><tspan class="vis-pub">+</tspan> getTodayReservations() : List</text>
+      <text x="56" y="1078" class="attr-line"><tspan class="vis-prot">◈</tspan> validateXOR() : boolean</text>
+      <text x="56" y="1091" class="attr-line"><tspan class="vis-priv">−</tspan> checkConflicts() : void</text>
+      <text x="56" y="1104" class="attr-line"><tspan class="vis-priv">−</tspan> notifyRequester() : void</text>
+      <text x="56" y="1117" class="attr-line"><tspan class="vis-priv">−</tspan> auditChange(action) : void</text>
+    </g>
+
+    <!-- Prestamo -->
+    <g filter="url(#shadow)">
+      <rect x="350" y="750" width="265" height="410" rx="7" class="cls-bg cls-bg-loan"/>
+      <rect x="350" y="750" width="265" height="44" rx="7" class="cls-hdr cls-hdr-loan"/>
+      <rect x="350" y="782" width="265" height="14" class="cls-hdr-loan"/>
+      <text x="482" y="766" text-anchor="middle" class="stereo">«entity»</text>
+      <text x="482" y="783" text-anchor="middle" class="cls-name">Prestamo</text>
+      <line x1="350" y1="796" x2="615" y2="796" class="divider"/>
+      <text x="362" y="809" class="sect-lbl">atributos</text>
+      <text x="366" y="823" class="attr-line"><tspan class="vis-priv">−</tspan> requesterType : ReqType</text>
+      <text x="366" y="836" class="attr-line"><tspan class="vis-priv">−</tspan> requestDate : LocalDateTime</text>
+      <text x="366" y="849" class="attr-line"><tspan class="vis-priv">−</tspan> expectedReturnDate : LDT</text>
+      <text x="366" y="862" class="attr-line"><tspan class="vis-priv">−</tspan> actualReturnDate : LDT</text>
+      <text x="366" y="875" class="attr-line"><tspan class="vis-priv">−</tspan> status : LoanStatus</text>
+      <text x="366" y="888" class="attr-line"><tspan class="vis-priv">−</tspan> notes : String</text>
+      <text x="366" y="901" class="attr-line"><tspan class="vis-priv">−</tspan> createdAt : LocalDateTime</text>
+      <text x="366" y="914" class="attr-line"><tspan class="vis-priv">−</tspan> updatedAt : LocalDateTime</text>
+      <line x1="350" y1="921" x2="615" y2="921" class="divider"/>
+      <text x="362" y="934" class="sect-lbl">métodos</text>
+      <text x="366" y="948" class="attr-line"><tspan class="vis-pub">+</tspan> create(dto) : Prestamo</text>
+      <text x="366" y="961" class="attr-line"><tspan class="vis-pub">+</tspan> returnLoan() : void</text>
+      <text x="366" y="974" class="attr-line"><tspan class="vis-pub">+</tspan> markOverdue() : void</text>
+      <text x="366" y="987" class="attr-line"><tspan class="vis-pub">+</tspan> reportLost() : void</text>
+      <text x="366" y="1000" class="attr-line"><tspan class="vis-pub">+</tspan> isActive() : boolean</text>
+      <text x="366" y="1013" class="attr-line"><tspan class="vis-pub">+</tspan> isOverdue() : boolean</text>
+      <text x="366" y="1026" class="attr-line"><tspan class="vis-pub">+</tspan> generateFine() : Multa</text>
+      <text x="366" y="1039" class="attr-line"><tspan class="vis-pub">+</tspan> getByRequester(id) : List</text>
+      <text x="366" y="1052" class="attr-line"><tspan class="vis-pub">+</tspan> getActiveByComputer(id) : List</text>
+      <text x="366" y="1065" class="attr-line"><tspan class="vis-pub">+</tspan> getActiveLoans() : List</text>
+      <text x="366" y="1078" class="attr-line"><tspan class="vis-pub">+</tspan> getOverdueLoans() : List</text>
+      <text x="366" y="1091" class="attr-line"><tspan class="vis-prot">◈</tspan> validateXOR() : boolean</text>
+      <text x="366" y="1104" class="attr-line"><tspan class="vis-priv">−</tspan> updateComputerStatus() : void</text>
+      <text x="366" y="1117" class="attr-line"><tspan class="vis-priv">−</tspan> notifyRequester() : void</text>
+      <text x="366" y="1130" class="attr-line"><tspan class="vis-priv">−</tspan> auditChange(action) : void</text>
+      <text x="366" y="1143" class="attr-line"><tspan class="vis-pub">+</tspan> findById(id) : Prestamo</text>
+    </g>
+
+    <!-- Multa -->
+    <g filter="url(#shadow)">
+      <rect x="670" y="750" width="250" height="358" rx="7" class="cls-bg cls-bg-fine"/>
+      <rect x="670" y="750" width="250" height="44" rx="7" class="cls-hdr cls-hdr-fine"/>
+      <rect x="670" y="782" width="250" height="14" class="cls-hdr-fine"/>
+      <text x="795" y="766" text-anchor="middle" class="stereo">«entity»</text>
+      <text x="795" y="783" text-anchor="middle" class="cls-name">Multa</text>
+      <line x1="670" y1="796" x2="920" y2="796" class="divider"/>
+      <text x="682" y="809" class="sect-lbl">atributos</text>
+      <text x="686" y="823" class="attr-line"><tspan class="vis-priv">−</tspan> requesterType : ReqType</text>
+      <text x="686" y="836" class="attr-line"><tspan class="vis-priv">−</tspan> amount : BigDecimal {&gt;0}</text>
+      <text x="686" y="849" class="attr-line"><tspan class="vis-priv">−</tspan> reason : String</text>
+      <text x="686" y="862" class="attr-line"><tspan class="vis-priv">−</tspan> status : FineStatus</text>
+      <text x="686" y="875" class="attr-line"><tspan class="vis-priv">−</tspan> generationDate : LDT</text>
+      <text x="686" y="888" class="attr-line"><tspan class="vis-priv">−</tspan> paymentDate : LDT</text>
+      <text x="686" y="901" class="attr-line"><tspan class="vis-priv">−</tspan> createdAt : LocalDateTime</text>
+      <text x="686" y="914" class="attr-line"><tspan class="vis-priv">−</tspan> updatedAt : LocalDateTime</text>
+      <line x1="670" y1="921" x2="920" y2="921" class="divider"/>
+      <text x="682" y="934" class="sect-lbl">métodos</text>
+      <text x="686" y="948" class="attr-line"><tspan class="vis-pub">+</tspan> create(dto) : Multa</text>
+      <text x="686" y="961" class="attr-line"><tspan class="vis-pub">+</tspan> pay() : void</text>
+      <text x="686" y="974" class="attr-line"><tspan class="vis-pub">+</tspan> waive() : void</text>
+      <text x="686" y="987" class="attr-line"><tspan class="vis-pub">+</tspan> dispute() : void</text>
+      <text x="686" y="1000" class="attr-line"><tspan class="vis-pub">+</tspan> isPending() : boolean</text>
+      <text x="686" y="1013" class="attr-line"><tspan class="vis-pub">+</tspan> getByStudent(id) : List</text>
+      <text x="686" y="1026" class="attr-line"><tspan class="vis-pub">+</tspan> getByProfessor(id) : List</text>
+      <text x="686" y="1039" class="attr-line"><tspan class="vis-pub">+</tspan> syncPendingFines(id) : void</text>
+      <text x="686" y="1052" class="attr-line"><tspan class="vis-prot">◈</tspan> validateXOR() : boolean</text>
+      <text x="686" y="1065" class="attr-line"><tspan class="vis-priv">−</tspan> notifyUser() : void</text>
+      <text x="686" y="1078" class="attr-line"><tspan class="vis-priv">−</tspan> auditChange(action) : void</text>
+      <text x="686" y="1091" class="attr-line"><tspan class="vis-pub">+</tspan> getPendingByUser(id) : List</text>
+    </g>
+
+    <!-- Auditoria -->
+    <g filter="url(#shadow)">
+      <rect x="975" y="750" width="250" height="318" rx="7" class="cls-bg cls-bg-audit"/>
+      <rect x="975" y="750" width="250" height="44" rx="7" class="cls-hdr cls-hdr-audit"/>
+      <rect x="975" y="782" width="250" height="14" class="cls-hdr-audit"/>
+      <text x="1100" y="766" text-anchor="middle" class="stereo">«entity»</text>
+      <text x="1100" y="783" text-anchor="middle" class="cls-name">Auditoria</text>
+      <line x1="975" y1="796" x2="1225" y2="796" class="divider"/>
+      <text x="987" y="809" class="sect-lbl">atributos</text>
+      <text x="991" y="823" class="attr-line"><tspan class="vis-priv">−</tspan> affectedTable : String</text>
+      <text x="991" y="836" class="attr-line"><tspan class="vis-priv">−</tspan> recordId : String</text>
+      <text x="991" y="849" class="attr-line"><tspan class="vis-priv">−</tspan> action : AuditAction</text>
+      <text x="991" y="862" class="attr-line"><tspan class="vis-priv">−</tspan> userRole : String</text>
+      <text x="991" y="875" class="attr-line"><tspan class="vis-priv">−</tspan> previousData : JsonNode</text>
+      <text x="991" y="888" class="attr-line"><tspan class="vis-priv">−</tspan> newData : JsonNode</text>
+      <text x="991" y="901" class="attr-line"><tspan class="vis-priv">−</tspan> sourceIp : InetAddress</text>
+      <text x="991" y="914" class="attr-line"><tspan class="vis-priv">−</tspan> dateTime : LocalDateTime</text>
+      <line x1="975" y1="921" x2="1225" y2="921" class="divider"/>
+      <text x="987" y="934" class="sect-lbl">métodos</text>
+      <text x="991" y="948" class="attr-line"><tspan class="vis-pub">+</tspan> log(dto) : Auditoria</text>
+      <text x="991" y="961" class="attr-line"><tspan class="vis-pub">+</tspan> findByTable(t) : List</text>
+      <text x="991" y="974" class="attr-line"><tspan class="vis-pub">+</tspan> findByUser(id, type) : List</text>
+      <text x="991" y="987" class="attr-line"><tspan class="vis-pub">+</tspan> findByDateRange(f,t) : List</text>
+      <text x="991" y="1000" class="attr-line"><tspan class="vis-pub">+</tspan> findByAction(a) : List</text>
+      <text x="991" y="1013" class="attr-line"><tspan class="vis-pub">+</tspan> getEmployeeActivity(id) : List</text>
+      <text x="991" y="1026" class="attr-line"><tspan class="vis-priv">−</tspan> serialize(data) : JsonNode</text>
+      <text x="991" y="1039" class="attr-line"><tspan class="vis-priv">−</tspan> captureIp() : String</text>
+      <text x="991" y="1052" class="attr-line"><tspan class="vis-pub">+</tspan> toDTO() : AuditoriaDTO</text>
+      <text x="991" y="1065" class="attr-line"><tspan class="vis-prot">◈</tspan> validate() : boolean</text>
+    </g>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         LAYER 4 — SERVICES
+    ═══════════════════════════════════════════════════════ -->
+
+    <!-- EmpleadoService -->
+    <g filter="url(#shadow)">
+      <rect x="40" y="1190" width="220" height="270" rx="7" class="cls-bg cls-bg-svc"/>
+      <rect x="40" y="1190" width="220" height="44" rx="7" class="cls-hdr cls-hdr-svc"/>
+      <rect x="40" y="1222" width="220" height="14" class="cls-hdr-svc"/>
+      <text x="150" y="1206" text-anchor="middle" class="stereo">«service»</text>
+      <text x="150" y="1223" text-anchor="middle" class="cls-name">EmpleadoService</text>
+      <line x1="40" y1="1234" x2="260" y2="1234" class="divider"/>
+      <text x="52" y="1248" class="attr-line"><tspan class="vis-pub">+</tspan> registerEmployee(dto) : EmpDTO</text>
+      <text x="52" y="1261" class="attr-line"><tspan class="vis-pub">+</tspan> updateEmployee(id, dto) : EmpDTO</text>
+      <text x="52" y="1274" class="attr-line"><tspan class="vis-pub">+</tspan> deactivateEmployee(id) : void</text>
+      <text x="52" y="1287" class="attr-line"><tspan class="vis-pub">+</tspan> findEmployee(criteria) : EmpDTO</text>
+      <text x="52" y="1300" class="attr-line"><tspan class="vis-pub">+</tspan> validateLastAdmin(id) : void</text>
+      <text x="52" y="1313" class="attr-line"><tspan class="vis-pub">+</tspan> getProfile(id) : EmpDTO</text>
+      <text x="52" y="1326" class="attr-line"><tspan class="vis-pub">+</tspan> changeRole(id, role) : void</text>
+      <text x="52" y="1339" class="attr-line"><tspan class="vis-pub">+</tspan> listAll(pageable) : Page</text>
+      <text x="52" y="1352" class="attr-line"><tspan class="vis-priv">−</tspan> encodePassword(raw) : String</text>
+      <text x="52" y="1365" class="attr-line"><tspan class="vis-priv">−</tspan> auditChange(e, action) : void</text>
+      <text x="52" y="1378" class="attr-line"><tspan class="vis-priv">−</tspan> validateEmailDomain(e) : void</text>
+      <text x="52" y="1391" class="attr-line"><tspan class="vis-priv">−</tspan> checkDuplicates(dto) : void</text>
+      <text x="52" y="1404" class="attr-line"><tspan class="vis-pub">+</tspan> searchByFilters(f) : List</text>
+      <text x="52" y="1417" class="attr-line"><tspan class="vis-pub">+</tspan> getActivitySummary(id) : DTO</text>
+      <text x="52" y="1430" class="attr-line"><tspan class="vis-pub">+</tspan> verifyPassword(raw,hash) : bool</text>
+      <text x="52" y="1443" class="attr-line"><tspan class="vis-priv">−</tspan> sendWelcomeEmail(e) : void</text>
+    </g>
+
+    <!-- EstudianteService -->
+    <g filter="url(#shadow)">
+      <rect x="290" y="1190" width="225" height="270" rx="7" class="cls-bg cls-bg-svc"/>
+      <rect x="290" y="1190" width="225" height="44" rx="7" class="cls-hdr cls-hdr-svc"/>
+      <rect x="290" y="1222" width="225" height="14" class="cls-hdr-svc"/>
+      <text x="402" y="1206" text-anchor="middle" class="stereo">«service»</text>
+      <text x="402" y="1223" text-anchor="middle" class="cls-name">EstudianteService</text>
+      <line x1="290" y1="1234" x2="515" y2="1234" class="divider"/>
+      <text x="302" y="1248" class="attr-line"><tspan class="vis-pub">+</tspan> registerStudent(dto) : EstDTO</text>
+      <text x="302" y="1261" class="attr-line"><tspan class="vis-pub">+</tspan> updateStudent(id, dto) : EstDTO</text>
+      <text x="302" y="1274" class="attr-line"><tspan class="vis-pub">+</tspan> deactivateStudent(id) : void</text>
+      <text x="302" y="1287" class="attr-line"><tspan class="vis-pub">+</tspan> findStudent(criteria) : EstDTO</text>
+      <text x="302" y="1300" class="attr-line"><tspan class="vis-pub">+</tspan> checkActiveLoans(id) : boolean</text>
+      <text x="302" y="1313" class="attr-line"><tspan class="vis-pub">+</tspan> getProfile(id) : EstDTO</text>
+      <text x="302" y="1326" class="attr-line"><tspan class="vis-pub">+</tspan> syncPendingFines(id) : void</text>
+      <text x="302" y="1339" class="attr-line"><tspan class="vis-pub">+</tspan> listAll(pageable) : Page</text>
+      <text x="302" y="1352" class="attr-line"><tspan class="vis-pub">+</tspan> searchByFilters(f) : List</text>
+      <text x="302" y="1365" class="attr-line"><tspan class="vis-priv">−</tspan> encodePassword(raw) : String</text>
+      <text x="302" y="1378" class="attr-line"><tspan class="vis-priv">−</tspan> auditChange(e, action) : void</text>
+      <text x="302" y="1391" class="attr-line"><tspan class="vis-priv">−</tspan> validateEmailDomain(e) : void</text>
+      <text x="302" y="1404" class="attr-line"><tspan class="vis-priv">−</tspan> checkDuplicates(dto) : void</text>
+      <text x="302" y="1417" class="attr-line"><tspan class="vis-priv">−</tspan> validateStudentActive(id) : void</text>
+    </g>
+
+    <!-- ProfesorService -->
+    <g filter="url(#shadow)">
+      <rect x="545" y="1190" width="225" height="270" rx="7" class="cls-bg cls-bg-svc"/>
+      <rect x="545" y="1190" width="225" height="44" rx="7" class="cls-hdr cls-hdr-svc"/>
+      <rect x="545" y="1222" width="225" height="14" class="cls-hdr-svc"/>
+      <text x="657" y="1206" text-anchor="middle" class="stereo">«service»</text>
+      <text x="657" y="1223" text-anchor="middle" class="cls-name">ProfesorService</text>
+      <line x1="545" y1="1234" x2="770" y2="1234" class="divider"/>
+      <text x="557" y="1248" class="attr-line"><tspan class="vis-pub">+</tspan> registerProfessor(dto) : ProDTO</text>
+      <text x="557" y="1261" class="attr-line"><tspan class="vis-pub">+</tspan> updateProfessor(id, dto) : ProDTO</text>
+      <text x="557" y="1274" class="attr-line"><tspan class="vis-pub">+</tspan> deactivateProfessor(id) : void</text>
+      <text x="557" y="1287" class="attr-line"><tspan class="vis-pub">+</tspan> findProfessor(criteria) : ProDTO</text>
+      <text x="557" y="1300" class="attr-line"><tspan class="vis-pub">+</tspan> checkActiveLoans(id) : boolean</text>
+      <text x="557" y="1313" class="attr-line"><tspan class="vis-pub">+</tspan> getProfile(id) : ProDTO</text>
+      <text x="557" y="1326" class="attr-line"><tspan class="vis-pub">+</tspan> applyFine(id, dto) : void</text>
+      <text x="557" y="1339" class="attr-line"><tspan class="vis-pub">+</tspan> getPrivileges(id) : int</text>
+      <text x="557" y="1352" class="attr-line"><tspan class="vis-pub">+</tspan> listAll(pageable) : Page</text>
+      <text x="557" y="1365" class="attr-line"><tspan class="vis-priv">−</tspan> encodePassword(raw) : String</text>
+      <text x="557" y="1378" class="attr-line"><tspan class="vis-priv">−</tspan> auditChange(e, action) : void</text>
+      <text x="557" y="1391" class="attr-line"><tspan class="vis-priv">−</tspan> validateEmailDomain(e) : void</text>
+      <text x="557" y="1404" class="attr-line"><tspan class="vis-pub">+</tspan> searchByFilters(f) : List</text>
+    </g>
+
+    <!-- SalaService -->
+    <g filter="url(#shadow)">
+      <rect x="800" y="1190" width="230" height="270" rx="7" class="cls-bg cls-bg-svc"/>
+      <rect x="800" y="1190" width="230" height="44" rx="7" class="cls-hdr cls-hdr-svc"/>
+      <rect x="800" y="1222" width="230" height="14" class="cls-hdr-svc"/>
+      <text x="915" y="1206" text-anchor="middle" class="stereo">«service»</text>
+      <text x="915" y="1223" text-anchor="middle" class="cls-name">SalaService</text>
+      <line x1="800" y1="1234" x2="1030" y2="1234" class="divider"/>
+      <text x="812" y="1248" class="attr-line"><tspan class="vis-pub">+</tspan> registerRoom(dto) : SalaDTO</text>
+      <text x="812" y="1261" class="attr-line"><tspan class="vis-pub">+</tspan> updateRoom(id, dto) : SalaDTO</text>
+      <text x="812" y="1274" class="attr-line"><tspan class="vis-pub">+</tspan> deactivateRoom(id) : void</text>
+      <text x="812" y="1287" class="attr-line"><tspan class="vis-pub">+</tspan> findRoom(criteria) : SalaDTO</text>
+      <text x="812" y="1300" class="attr-line"><tspan class="vis-pub">+</tspan> getAvailableRooms(f) : List</text>
+      <text x="812" y="1313" class="attr-line"><tspan class="vis-pub">+</tspan> checkActiveReservations(id) : bool</text>
+      <text x="812" y="1326" class="attr-line"><tspan class="vis-pub">+</tspan> manageEquipment(id, dto) : void</text>
+      <text x="812" y="1339" class="attr-line"><tspan class="vis-pub">+</tspan> listAll(pageable) : Page</text>
+      <text x="812" y="1352" class="attr-line"><tspan class="vis-pub">+</tspan> searchByFilters(f) : List</text>
+      <text x="812" y="1365" class="attr-line"><tspan class="vis-priv">−</tspan> validateUniqueLocation(dto) : void</text>
+      <text x="812" y="1378" class="attr-line"><tspan class="vis-priv">−</tspan> validateCapacity(c) : void</text>
+      <text x="812" y="1391" class="attr-line"><tspan class="vis-priv">−</tspan> validateSchedule(o, c) : void</text>
+      <text x="812" y="1404" class="attr-line"><tspan class="vis-priv">−</tspan> auditChange(r, action) : void</text>
+      <text x="812" y="1417" class="attr-line"><tspan class="vis-priv">−</tspan> notifyUsersOnDeactivate(id) : void</text>
+    </g>
+
+    <!-- ComputadoraService -->
+    <g filter="url(#shadow)">
+      <rect x="1065" y="1190" width="235" height="270" rx="7" class="cls-bg cls-bg-svc"/>
+      <rect x="1065" y="1190" width="235" height="44" rx="7" class="cls-hdr cls-hdr-svc"/>
+      <rect x="1065" y="1222" width="235" height="14" class="cls-hdr-svc"/>
+      <text x="1182" y="1206" text-anchor="middle" class="stereo">«service»</text>
+      <text x="1182" y="1223" text-anchor="middle" class="cls-name">ComputadoraService</text>
+      <line x1="1065" y1="1234" x2="1300" y2="1234" class="divider"/>
+      <text x="1077" y="1248" class="attr-line"><tspan class="vis-pub">+</tspan> registerComputer(dto) : CompDTO</text>
+      <text x="1077" y="1261" class="attr-line"><tspan class="vis-pub">+</tspan> updateComputer(id, dto) : CompDTO</text>
+      <text x="1077" y="1274" class="attr-line"><tspan class="vis-pub">+</tspan> deactivateComputer(id) : void</text>
+      <text x="1077" y="1287" class="attr-line"><tspan class="vis-pub">+</tspan> findComputer(criteria) : CompDTO</text>
+      <text x="1077" y="1300" class="attr-line"><tspan class="vis-pub">+</tspan> getAvailableComputers() : List</text>
+      <text x="1077" y="1313" class="attr-line"><tspan class="vis-pub">+</tspan> generateQRCode(id) : String</text>
+      <text x="1077" y="1326" class="attr-line"><tspan class="vis-pub">+</tspan> checkActiveLoans(id) : boolean</text>
+      <text x="1077" y="1339" class="attr-line"><tspan class="vis-pub">+</tspan> getByStatus(s) : List</text>
+      <text x="1077" y="1352" class="attr-line"><tspan class="vis-pub">+</tspan> getHistory(id) : List</text>
+      <text x="1077" y="1365" class="attr-line"><tspan class="vis-pub">+</tspan> listAll(pageable) : Page</text>
+      <text x="1077" y="1378" class="attr-line"><tspan class="vis-priv">−</tspan> auditChange(c, action) : void</text>
+      <text x="1077" y="1391" class="attr-line"><tspan class="vis-priv">−</tspan> validateNoActiveLoan(id) : void</text>
+      <text x="1077" y="1404" class="attr-line"><tspan class="vis-priv">−</tspan> notifyOnDeactivate(id) : void</text>
+      <text x="1077" y="1417" class="attr-line"><tspan class="vis-priv">−</tspan> checkInventoryCode(code) : void</text>
+    </g>
+
+    <!-- ReservaService -->
+    <g filter="url(#shadow)">
+      <rect x="1340" y="1190" width="240" height="270" rx="7" class="cls-bg cls-bg-svc"/>
+      <rect x="1340" y="1190" width="240" height="44" rx="7" class="cls-hdr cls-hdr-svc"/>
+      <rect x="1340" y="1222" width="240" height="14" class="cls-hdr-svc"/>
+      <text x="1460" y="1206" text-anchor="middle" class="stereo">«service»</text>
+      <text x="1460" y="1223" text-anchor="middle" class="cls-name">ReservaService</text>
+      <line x1="1340" y1="1234" x2="1580" y2="1234" class="divider"/>
+      <text x="1352" y="1248" class="attr-line"><tspan class="vis-pub">+</tspan> createReservation(dto) : ResDTO</text>
+      <text x="1352" y="1261" class="attr-line"><tspan class="vis-pub">+</tspan> cancelReservation(id, reason) : void</text>
+      <text x="1352" y="1274" class="attr-line"><tspan class="vis-pub">+</tspan> completeReservation(id) : void</text>
+      <text x="1352" y="1287" class="attr-line"><tspan class="vis-pub">+</tspan> convertToLoan(id) : PrestamoDTO</text>
+      <text x="1352" y="1300" class="attr-line"><tspan class="vis-pub">+</tspan> findReservations(f) : List</text>
+      <text x="1352" y="1313" class="attr-line"><tspan class="vis-pub">+</tspan> checkOverlap(dto) : boolean</text>
+      <text x="1352" y="1326" class="attr-line"><tspan class="vis-pub">+</tspan> getTodayReservations() : List</text>
+      <text x="1352" y="1339" class="attr-line"><tspan class="vis-pub">+</tspan> getByRequester(id, type) : List</text>
+      <text x="1352" y="1352" class="attr-line"><tspan class="vis-pub">+</tspan> listAll(pageable) : Page</text>
+      <text x="1352" y="1365" class="attr-line"><tspan class="vis-priv">−</tspan> validateXOR(dto) : void</text>
+      <text x="1352" y="1378" class="attr-line"><tspan class="vis-priv">−</tspan> auditChange(r, action) : void</text>
+      <text x="1352" y="1391" class="attr-line"><tspan class="vis-priv">−</tspan> notifyRequester(id) : void</text>
+      <text x="1352" y="1404" class="attr-line"><tspan class="vis-priv">−</tspan> validateResourceAvailable(dto) : void</text>
+      <text x="1352" y="1417" class="attr-line"><tspan class="vis-pub">+</tspan> findById(id) : ResDTO</text>
+    </g>
+
+    <!-- PrestamoService -->
+    <g filter="url(#shadow)">
+      <rect x="1615" y="1190" width="240" height="270" rx="7" class="cls-bg cls-bg-svc"/>
+      <rect x="1615" y="1190" width="240" height="44" rx="7" class="cls-hdr cls-hdr-svc"/>
+      <rect x="1615" y="1222" width="240" height="14" class="cls-hdr-svc"/>
+      <text x="1735" y="1206" text-anchor="middle" class="stereo">«service»</text>
+      <text x="1735" y="1223" text-anchor="middle" class="cls-name">PrestamoService</text>
+      <line x1="1615" y1="1234" x2="1855" y2="1234" class="divider"/>
+      <text x="1627" y="1248" class="attr-line"><tspan class="vis-pub">+</tspan> createLoan(dto) : PreDTO</text>
+      <text x="1627" y="1261" class="attr-line"><tspan class="vis-pub">+</tspan> returnLoan(id) : void</text>
+      <text x="1627" y="1274" class="attr-line"><tspan class="vis-pub">+</tspan> markOverdue(id) : void</text>
+      <text x="1627" y="1287" class="attr-line"><tspan class="vis-pub">+</tspan> reportLost(id) : void</text>
+      <text x="1627" y="1300" class="attr-line"><tspan class="vis-pub">+</tspan> getActiveLoans() : List</text>
+      <text x="1627" y="1313" class="attr-line"><tspan class="vis-pub">+</tspan> getOverdueLoans() : List</text>
+      <text x="1627" y="1326" class="attr-line"><tspan class="vis-pub">+</tspan> getByRequester(id, type) : List</text>
+      <text x="1627" y="1339" class="attr-line"><tspan class="vis-pub">+</tspan> listAll(pageable) : Page</text>
+      <text x="1627" y="1352" class="attr-line"><tspan class="vis-pub">+</tspan> findById(id) : PreDTO</text>
+      <text x="1627" y="1365" class="attr-line"><tspan class="vis-priv">−</tspan> generateFineIfNeeded(id) : void</text>
+      <text x="1627" y="1378" class="attr-line"><tspan class="vis-priv">−</tspan> auditChange(p, action) : void</text>
+      <text x="1627" y="1391" class="attr-line"><tspan class="vis-priv">−</tspan> notifyRequester(id) : void</text>
+      <text x="1627" y="1404" class="attr-line"><tspan class="vis-priv">−</tspan> validateRequesterActive(id) : void</text>
+      <text x="1627" y="1417" class="attr-line"><tspan class="vis-priv">−</tspan> updateComputerStatus(id) : void</text>
+    </g>
+
+    <!-- MultaService -->
+    <g filter="url(#shadow)">
+      <rect x="1895" y="1190" width="230" height="257" rx="7" class="cls-bg cls-bg-svc"/>
+      <rect x="1895" y="1190" width="230" height="44" rx="7" class="cls-hdr cls-hdr-svc"/>
+      <rect x="1895" y="1222" width="230" height="14" class="cls-hdr-svc"/>
+      <text x="2010" y="1206" text-anchor="middle" class="stereo">«service»</text>
+      <text x="2010" y="1223" text-anchor="middle" class="cls-name">MultaService</text>
+      <line x1="1895" y1="1234" x2="2125" y2="1234" class="divider"/>
+      <text x="1907" y="1248" class="attr-line"><tspan class="vis-pub">+</tspan> createFine(dto) : MultaDTO</text>
+      <text x="1907" y="1261" class="attr-line"><tspan class="vis-pub">+</tspan> payFine(id) : void</text>
+      <text x="1907" y="1274" class="attr-line"><tspan class="vis-pub">+</tspan> waiveFine(id) : void</text>
+      <text x="1907" y="1287" class="attr-line"><tspan class="vis-pub">+</tspan> disputeFine(id) : void</text>
+      <text x="1907" y="1300" class="attr-line"><tspan class="vis-pub">+</tspan> getByStudent(id) : List</text>
+      <text x="1907" y="1313" class="attr-line"><tspan class="vis-pub">+</tspan> getByProfessor(id) : List</text>
+      <text x="1907" y="1326" class="attr-line"><tspan class="vis-pub">+</tspan> syncPendingFines(id, type) : void</text>
+      <text x="1907" y="1339" class="attr-line"><tspan class="vis-pub">+</tspan> getPendingByUser(id) : List</text>
+      <text x="1907" y="1352" class="attr-line"><tspan class="vis-pub">+</tspan> listAll(pageable) : Page</text>
+      <text x="1907" y="1365" class="attr-line"><tspan class="vis-priv">−</tspan> auditChange(f, action) : void</text>
+      <text x="1907" y="1378" class="attr-line"><tspan class="vis-priv">−</tspan> notifyUser(id) : void</text>
+      <text x="1907" y="1391" class="attr-line"><tspan class="vis-pub">+</tspan> findById(id) : MultaDTO</text>
+      <text x="1907" y="1404" class="attr-line"><tspan class="vis-priv">−</tspan> validateFineOwner(dto) : void</text>
+      <text x="1907" y="1417" class="attr-line"><tspan class="vis-priv">−</tspan> validateAmount(dto) : void</text>
+      <text x="1907" y="1430" class="attr-line"><tspan class="vis-pub">+</tspan> getOverdueSummary() : DTO</text>
+    </g>
+
+    <!-- AuditoriaService -->
+    <g filter="url(#shadow)">
+      <rect x="2165" y="1190" width="230" height="218" rx="7" class="cls-bg cls-bg-svc"/>
+      <rect x="2165" y="1190" width="230" height="44" rx="7" class="cls-hdr cls-hdr-svc"/>
+      <rect x="2165" y="1222" width="230" height="14" class="cls-hdr-svc"/>
+      <text x="2280" y="1206" text-anchor="middle" class="stereo">«service»</text>
+      <text x="2280" y="1223" text-anchor="middle" class="cls-name">AuditoriaService</text>
+      <line x1="2165" y1="1234" x2="2395" y2="1234" class="divider"/>
+      <text x="2177" y="1248" class="attr-line"><tspan class="vis-pub">+</tspan> logAction(dto) : AudDTO</text>
+      <text x="2177" y="1261" class="attr-line"><tspan class="vis-pub">+</tspan> getByTable(table) : List</text>
+      <text x="2177" y="1274" class="attr-line"><tspan class="vis-pub">+</tspan> getByUser(id, type) : List</text>
+      <text x="2177" y="1287" class="attr-line"><tspan class="vis-pub">+</tspan> getByDateRange(f, t) : List</text>
+      <text x="2177" y="1300" class="attr-line"><tspan class="vis-pub">+</tspan> getByAction(action) : List</text>
+      <text x="2177" y="1313" class="attr-line"><tspan class="vis-pub">+</tspan> getEmployeeActivity(id) : DTO</text>
+      <text x="2177" y="1326" class="attr-line"><tspan class="vis-pub">+</tspan> listAll(pageable) : Page</text>
+      <text x="2177" y="1339" class="attr-line"><tspan class="vis-priv">−</tspan> serialize(data) : JsonNode</text>
+      <text x="2177" y="1352" class="attr-line"><tspan class="vis-priv">−</tspan> captureCurrentUser() : UUID</text>
+      <text x="2177" y="1365" class="attr-line"><tspan class="vis-priv">−</tspan> captureIp() : String</text>
+      <text x="2177" y="1378" class="attr-line"><tspan class="vis-pub">+</tspan> exportReport(filters) : byte[]</text>
+      <text x="2177" y="1391" class="attr-line"><tspan class="vis-priv">−</tspan> validateImmutability() : void</text>
+    </g>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         LAYER 5 — CONTROLLERS
+    ═══════════════════════════════════════════════════════ -->
+
+    <!-- EmpleadoController -->
+    <g filter="url(#shadow)">
+      <rect x="40" y="1530" width="220" height="178" rx="7" class="cls-bg cls-bg-ctrl"/>
+      <rect x="40" y="1530" width="220" height="44" rx="7" class="cls-hdr cls-hdr-ctrl"/>
+      <rect x="40" y="1562" width="220" height="14" class="cls-hdr-ctrl"/>
+      <text x="150" y="1546" text-anchor="middle" class="stereo">«controller»  /api/employees</text>
+      <text x="150" y="1563" text-anchor="middle" class="cls-name">EmpleadoController</text>
+      <line x1="40" y1="1574" x2="260" y2="1574" class="divider"/>
+      <text x="52" y="1588" class="attr-line"><tspan class="vis-pub">+</tspan> POST   /  → register</text>
+      <text x="52" y="1601" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /{id} → findById</text>
+      <text x="52" y="1614" class="attr-line"><tspan class="vis-pub">+</tspan> GET    / → listAll</text>
+      <text x="52" y="1627" class="attr-line"><tspan class="vis-pub">+</tspan> PUT    /{id} → update</text>
+      <text x="52" y="1640" class="attr-line"><tspan class="vis-pub">+</tspan> PATCH  /{id}/status → deactivate</text>
+      <text x="52" y="1653" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /{id}/profile → profile</text>
+      <text x="52" y="1666" class="attr-line"><tspan class="vis-pub">+</tspan> PATCH  /{id}/role → changeRole</text>
+      <text x="52" y="1679" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /search → search</text>
+      <text x="52" y="1692" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /{id}/activity → activity</text>
+    </g>
+
+    <!-- EstudianteController -->
+    <g filter="url(#shadow)">
+      <rect x="290" y="1530" width="225" height="165" rx="7" class="cls-bg cls-bg-ctrl"/>
+      <rect x="290" y="1530" width="225" height="44" rx="7" class="cls-hdr cls-hdr-ctrl"/>
+      <rect x="290" y="1562" width="225" height="14" class="cls-hdr-ctrl"/>
+      <text x="402" y="1546" text-anchor="middle" class="stereo">«controller»  /api/students</text>
+      <text x="402" y="1563" text-anchor="middle" class="cls-name">EstudianteController</text>
+      <line x1="290" y1="1574" x2="515" y2="1574" class="divider"/>
+      <text x="302" y="1588" class="attr-line"><tspan class="vis-pub">+</tspan> POST   / → register</text>
+      <text x="302" y="1601" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /{id} → findById</text>
+      <text x="302" y="1614" class="attr-line"><tspan class="vis-pub">+</tspan> GET    / → listAll</text>
+      <text x="302" y="1627" class="attr-line"><tspan class="vis-pub">+</tspan> PUT    /{id} → update</text>
+      <text x="302" y="1640" class="attr-line"><tspan class="vis-pub">+</tspan> PATCH  /{id}/status → deactivate</text>
+      <text x="302" y="1653" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /{id}/profile → profile</text>
+      <text x="302" y="1666" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /{id}/fines → fines</text>
+      <text x="302" y="1679" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /search → search</text>
+    </g>
+
+    <!-- ProfesorController -->
+    <g filter="url(#shadow)">
+      <rect x="545" y="1530" width="225" height="152" rx="7" class="cls-bg cls-bg-ctrl"/>
+      <rect x="545" y="1530" width="225" height="44" rx="7" class="cls-hdr cls-hdr-ctrl"/>
+      <rect x="545" y="1562" width="225" height="14" class="cls-hdr-ctrl"/>
+      <text x="657" y="1546" text-anchor="middle" class="stereo">«controller»  /api/professors</text>
+      <text x="657" y="1563" text-anchor="middle" class="cls-name">ProfesorController</text>
+      <line x1="545" y1="1574" x2="770" y2="1574" class="divider"/>
+      <text x="557" y="1588" class="attr-line"><tspan class="vis-pub">+</tspan> POST   / → register</text>
+      <text x="557" y="1601" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /{id} → findById</text>
+      <text x="557" y="1614" class="attr-line"><tspan class="vis-pub">+</tspan> GET    / → listAll</text>
+      <text x="557" y="1627" class="attr-line"><tspan class="vis-pub">+</tspan> PUT    /{id} → update</text>
+      <text x="557" y="1640" class="attr-line"><tspan class="vis-pub">+</tspan> PATCH  /{id}/status → deactivate</text>
+      <text x="557" y="1653" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /{id}/profile → profile</text>
+      <text x="557" y="1666" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /search → search</text>
+    </g>
+
+    <!-- SalaController -->
+    <g filter="url(#shadow)">
+      <rect x="800" y="1530" width="230" height="165" rx="7" class="cls-bg cls-bg-ctrl"/>
+      <rect x="800" y="1530" width="230" height="44" rx="7" class="cls-hdr cls-hdr-ctrl"/>
+      <rect x="800" y="1562" width="230" height="14" class="cls-hdr-ctrl"/>
+      <text x="915" y="1546" text-anchor="middle" class="stereo">«controller»  /api/rooms</text>
+      <text x="915" y="1563" text-anchor="middle" class="cls-name">SalaController</text>
+      <line x1="800" y1="1574" x2="1030" y2="1574" class="divider"/>
+      <text x="812" y="1588" class="attr-line"><tspan class="vis-pub">+</tspan> POST   / → register</text>
+      <text x="812" y="1601" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /{id} → findById</text>
+      <text x="812" y="1614" class="attr-line"><tspan class="vis-pub">+</tspan> GET    / → listAll</text>
+      <text x="812" y="1627" class="attr-line"><tspan class="vis-pub">+</tspan> PUT    /{id} → update</text>
+      <text x="812" y="1640" class="attr-line"><tspan class="vis-pub">+</tspan> PATCH  /{id}/status → deactivate</text>
+      <text x="812" y="1653" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /available → available</text>
+      <text x="812" y="1666" class="attr-line"><tspan class="vis-pub">+</tspan> POST   /{id}/equipment → equipment</text>
+      <text x="812" y="1679" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /search → search</text>
+    </g>
+
+    <!-- ComputadoraController -->
+    <g filter="url(#shadow)">
+      <rect x="1065" y="1530" width="235" height="152" rx="7" class="cls-bg cls-bg-ctrl"/>
+      <rect x="1065" y="1530" width="235" height="44" rx="7" class="cls-hdr cls-hdr-ctrl"/>
+      <rect x="1065" y="1562" width="235" height="14" class="cls-hdr-ctrl"/>
+      <text x="1182" y="1546" text-anchor="middle" class="stereo">«controller»  /api/computers</text>
+      <text x="1182" y="1563" text-anchor="middle" class="cls-name">ComputadoraController</text>
+      <line x1="1065" y1="1574" x2="1300" y2="1574" class="divider"/>
+      <text x="1077" y="1588" class="attr-line"><tspan class="vis-pub">+</tspan> POST   / → register</text>
+      <text x="1077" y="1601" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /{id} → findById</text>
+      <text x="1077" y="1614" class="attr-line"><tspan class="vis-pub">+</tspan> GET    / → listAll</text>
+      <text x="1077" y="1627" class="attr-line"><tspan class="vis-pub">+</tspan> PUT    /{id} → update</text>
+      <text x="1077" y="1640" class="attr-line"><tspan class="vis-pub">+</tspan> PATCH  /{id}/status → deactivate</text>
+      <text x="1077" y="1653" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /available → available</text>
+      <text x="1077" y="1666" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /{id}/qr → qrCode</text>
+    </g>
+
+    <!-- ReservaController -->
+    <g filter="url(#shadow)">
+      <rect x="1340" y="1530" width="240" height="165" rx="7" class="cls-bg cls-bg-ctrl"/>
+      <rect x="1340" y="1530" width="240" height="44" rx="7" class="cls-hdr cls-hdr-ctrl"/>
+      <rect x="1340" y="1562" width="240" height="14" class="cls-hdr-ctrl"/>
+      <text x="1460" y="1546" text-anchor="middle" class="stereo">«controller»  /api/reservations</text>
+      <text x="1460" y="1563" text-anchor="middle" class="cls-name">ReservaController</text>
+      <line x1="1340" y1="1574" x2="1580" y2="1574" class="divider"/>
+      <text x="1352" y="1588" class="attr-line"><tspan class="vis-pub">+</tspan> POST   / → create</text>
+      <text x="1352" y="1601" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /{id} → findById</text>
+      <text x="1352" y="1614" class="attr-line"><tspan class="vis-pub">+</tspan> GET    / → listAll</text>
+      <text x="1352" y="1627" class="attr-line"><tspan class="vis-pub">+</tspan> PATCH  /{id}/cancel → cancel</text>
+      <text x="1352" y="1640" class="attr-line"><tspan class="vis-pub">+</tspan> PATCH  /{id}/convert → toLoan</text>
+      <text x="1352" y="1653" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /today → today</text>
+      <text x="1352" y="1666" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /requester/{id} → byRequester</text>
+    </g>
+
+    <!-- PrestamoController -->
+    <g filter="url(#shadow)">
+      <rect x="1615" y="1530" width="240" height="165" rx="7" class="cls-bg cls-bg-ctrl"/>
+      <rect x="1615" y="1530" width="240" height="44" rx="7" class="cls-hdr cls-hdr-ctrl"/>
+      <rect x="1615" y="1562" width="240" height="14" class="cls-hdr-ctrl"/>
+      <text x="1735" y="1546" text-anchor="middle" class="stereo">«controller»  /api/loans</text>
+      <text x="1735" y="1563" text-anchor="middle" class="cls-name">PrestamoController</text>
+      <line x1="1615" y1="1574" x2="1855" y2="1574" class="divider"/>
+      <text x="1627" y="1588" class="attr-line"><tspan class="vis-pub">+</tspan> POST   / → create</text>
+      <text x="1627" y="1601" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /{id} → findById</text>
+      <text x="1627" y="1614" class="attr-line"><tspan class="vis-pub">+</tspan> GET    / → listAll</text>
+      <text x="1627" y="1627" class="attr-line"><tspan class="vis-pub">+</tspan> PATCH  /{id}/return → return</text>
+      <text x="1627" y="1640" class="attr-line"><tspan class="vis-pub">+</tspan> PATCH  /{id}/overdue → overdue</text>
+      <text x="1627" y="1653" class="attr-line"><tspan class="vis-pub">+</tspan> PATCH  /{id}/lost → lost</text>
+      <text x="1627" y="1666" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /active → active</text>
+    </g>
+
+    <!-- ═══════════════════════════════════════════════════════
+         LAYER 6 — SECURITY / DTOs / ENUMS
+    ═══════════════════════════════════════════════════════ -->
+
+    <!-- AuthController -->
+    <g filter="url(#shadow)">
+      <rect x="40" y="1760" width="210" height="152" rx="7" class="cls-bg cls-bg-ctrl"/>
+      <rect x="40" y="1760" width="210" height="44" rx="7" class="cls-hdr cls-hdr-ctrl"/>
+      <rect x="40" y="1792" width="210" height="14" class="cls-hdr-ctrl"/>
+      <text x="145" y="1776" text-anchor="middle" class="stereo">«controller»  /api/auth</text>
+      <text x="145" y="1793" text-anchor="middle" class="cls-name">AuthController</text>
+      <line x1="40" y1="1804" x2="250" y2="1804" class="divider"/>
+      <text x="52" y="1818" class="attr-line"><tspan class="vis-pub">+</tspan> POST   /login → login</text>
+      <text x="52" y="1831" class="attr-line"><tspan class="vis-pub">+</tspan> POST   /logout → logout</text>
+      <text x="52" y="1844" class="attr-line"><tspan class="vis-pub">+</tspan> POST   /refresh → refresh</text>
+      <text x="52" y="1857" class="attr-line"><tspan class="vis-pub">+</tspan> GET    /me → currentUser</text>
+      <text x="52" y="1870" class="attr-line"><tspan class="vis-pub">+</tspan> POST   /validate → validate</text>
+      <text x="52" y="1883" class="attr-line"><tspan class="vis-pub">+</tspan> POST   /change-password</text>
+      <text x="52" y="1896" class="attr-line"><tspan class="vis-pub">+</tspan> POST   /forgot-password</text>
+    </g>
+
+    <!-- AuthService -->
+    <g filter="url(#shadow)">
+      <rect x="285" y="1760" width="220" height="218" rx="7" class="cls-bg cls-bg-auth"/>
+      <rect x="285" y="1760" width="220" height="44" rx="7" class="cls-hdr cls-hdr-auth"/>
+      <rect x="285" y="1792" width="220" height="14" class="cls-hdr-auth"/>
+      <text x="395" y="1776" text-anchor="middle" class="stereo">«service»</text>
+      <text x="395" y="1793" text-anchor="middle" class="cls-name">AuthService</text>
+      <line x1="285" y1="1804" x2="505" y2="1804" class="divider"/>
+      <text x="297" y="1818" class="attr-line"><tspan class="vis-pub">+</tspan> authenticate(email, pwd) : JWT</text>
+      <text x="297" y="1831" class="attr-line"><tspan class="vis-pub">+</tspan> generateJWT(user) : String</text>
+      <text x="297" y="1844" class="attr-line"><tspan class="vis-pub">+</tspan> validateToken(token) : boolean</text>
+      <text x="297" y="1857" class="attr-line"><tspan class="vis-pub">+</tspan> refreshToken(token) : String</text>
+      <text x="297" y="1870" class="attr-line"><tspan class="vis-pub">+</tspan> revokeToken(token) : void</text>
+      <text x="297" y="1883" class="attr-line"><tspan class="vis-pub">+</tspan> loadUserByEmail(e) : UserDet</text>
+      <text x="297" y="1896" class="attr-line"><tspan class="vis-pub">+</tspan> logout(token) : void</text>
+      <text x="297" y="1909" class="attr-line"><tspan class="vis-priv">−</tspan> buildClaims(user) : Map</text>
+      <text x="297" y="1922" class="attr-line"><tspan class="vis-priv">−</tspan> checkExpiration(token) : void</text>
+      <text x="297" y="1935" class="attr-line"><tspan class="vis-priv">−</tspan> extractUser(token) : UserDet</text>
+      <text x="297" y="1948" class="attr-line"><tspan class="vis-priv">−</tspan> resolveUserType(email) : enum</text>
+      <text x="297" y="1961" class="attr-line"><tspan class="vis-pub">+</tspan> changePassword(id, dto) : void</text>
+      <text x="297" y="1974" class="attr-line"><tspan class="vis-pub">+</tspan> forgotPassword(email) : void</text>
+    </g>
+
+    <!-- JwtAuthFilter -->
+    <g filter="url(#shadow)">
+      <rect x="540" y="1760" width="220" height="152" rx="7" class="cls-bg cls-bg-auth"/>
+      <rect x="540" y="1760" width="220" height="44" rx="7" class="cls-hdr cls-hdr-auth"/>
+      <rect x="540" y="1792" width="220" height="14" class="cls-hdr-auth"/>
+      <text x="650" y="1776" text-anchor="middle" class="stereo">«filter»</text>
+      <text x="650" y="1793" text-anchor="middle" class="cls-name">JwtAuthFilter</text>
+      <line x1="540" y1="1804" x2="760" y2="1804" class="divider"/>
+      <text x="552" y="1818" class="attr-line"><tspan class="vis-prot">◈</tspan> doFilterInternal(req, res)</text>
+      <text x="552" y="1831" class="attr-line"><tspan class="vis-priv">−</tspan> extractToken(req) : String</text>
+      <text x="552" y="1844" class="attr-line"><tspan class="vis-priv">−</tspan> setAuthentication(token) : void</text>
+      <text x="552" y="1857" class="attr-line"><tspan class="vis-priv">−</tspan> isTokenExpired(t) : boolean</text>
+      <text x="552" y="1870" class="attr-line"><tspan class="vis-pub">+</tspan> shouldNotFilter(req) : boolean</text>
+      <text x="552" y="1883" class="attr-line"><tspan class="vis-priv">−</tspan> extractUserType(token) : String</text>
+      <text x="552" y="1896" class="attr-line"><tspan class="vis-priv">−</tspan> loadCorrectUserDetails() : void</text>
+      <text x="552" y="1909" class="attr-line"><tspan class="vis-priv">−</tspan> handleAuthException() : void</text>
+    </g>
+
+    <!-- «enumeration» paquete -->
+    <g filter="url(#shadow)">
+      <rect x="800" y="1760" width="620" height="218" rx="7" class="cls-bg cls-bg-dto"/>
+      <rect x="800" y="1760" width="620" height="44" rx="7" class="cls-hdr cls-hdr-dto"/>
+      <rect x="800" y="1792" width="620" height="14" class="cls-hdr-dto"/>
+      <text x="1110" y="1776" text-anchor="middle" class="stereo">«enumeration»</text>
+      <text x="1110" y="1793" text-anchor="middle" class="cls-name">Enumeraciones del Dominio</text>
+      <line x1="800" y1="1804" x2="1420" y2="1804" class="divider"/>
+      <text x="820" y="1820" class="sect-lbl">RoleType</text>
+      <text x="820" y="1834" class="attr-line" fill="#79c0ff">ADMINISTRATOR | IT_STAFF</text>
+      <text x="820" y="1853" class="sect-lbl">EmployeeStatus / AcademicStatus / ProfessorStatus</text>
+      <text x="820" y="1867" class="attr-line" fill="#79c0ff">ACTIVE | INACTIVE | SUSPENDED | RETIRED | SABBATICAL | GRADUATED</text>
+      <text x="820" y="1886" class="sect-lbl">RoomStatus / ComputerStatus</text>
+      <text x="820" y="1900" class="attr-line" fill="#79c0ff">AVAILABLE | MAINTENANCE | CLOSED | IN_LOAN | DAMAGED | RETIRED</text>
+      <text x="820" y="1919" class="sect-lbl">ReservationStatus / LoanStatus / FineStatus</text>
+      <text x="820" y="1933" class="attr-line" fill="#79c0ff">ACTIVE | CANCELLED | COMPLETED | CONVERTED_TO_LOAN | RETURNED | OVERDUE | LOST | PENDING | PAID | WAIVED | DISPUTED</text>
+      <text x="820" y="1952" class="sect-lbl">RequesterType / ResourceType / AuditAction / ContractType / EquipmentType</text>
+      <text x="820" y="1966" class="attr-line" fill="#79c0ff">STUDENT | PROFESSOR · ROOM | COMPUTER · CREATE | UPDATE | DELETE | LOGIN | LOGOUT · FULL_TIME | PART_TIME | ADJUNCT</text>
+    </g>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         RELATIONSHIPS — HERENCIA
+    ═══════════════════════════════════════════════════════ -->
+    <!-- Empleado → Usuario -->
+    <polyline points="155,330 155,304 950,304 950,290" class="rel r-inh" marker-end="url(#tri)"/>
+    <!-- Estudiante → Usuario -->
+    <polyline points="427,330 427,304 950,304" class="rel r-inh"/>
+    <!-- Profesor → Usuario -->
+    <polyline points="710,330 710,304 950,304" class="rel r-inh"/>
+
+    <!-- text label -->
+    <text x="450" y="300" class="rname" fill="#58a6ff">extiende</text>
+
+    <!-- ═══════════════════════════════════════════════════════
+         RELATIONSHIPS — IMPLEMENTACIÓN
+    ═══════════════════════════════════════════════════════ -->
+    <!-- Sala → IReservable -->
+    <polyline points="1000,330 1000,260 1667,260 1667,245" class="rel r-impl" marker-end="url(#tri-g)"/>
+    <!-- Computadora → IReservable -->
+    <polyline points="1297,330 1297,260 1750,260 1750,245 1720,245" class="rel r-impl" marker-end="url(#tri-g)"/>
+    <text x="1400" y="255" class="rname" fill="#3fb950">implements</text>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         RELATIONSHIPS — COMPOSICIÓN
+    ═══════════════════════════════════════════════════════ -->
+    <!-- Sala ◆──── SalaEquipamiento (composición fuerte) -->
+    <polyline points="1120,440 1320,440 1320,420 1470,420" class="rel r-comp" marker-start="url(#diam-f)"/>
+    <text x="1190" y="435" class="rcard">1</text>
+    <text x="1432" y="415" class="rcard">1..*</text>
+    <text x="1230" y="452" class="rname">equipada con</text>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         RELATIONSHIPS — AGREGACIÓN
+    ═══════════════════════════════════════════════════════ -->
+    <!-- Reserva ◇── Sala -->
+    <polyline points="300,840 640,840 640,560 880,560" class="rel r-aggr" marker-start="url(#diam-e)"/>
+    <text x="305" y="835" class="rcard">N</text>
+    <text x="848" y="555" class="rcard">0..1</text>
+    <text x="490" y="832" class="rname">asignada_en</text>
+
+    <!-- Reserva ◇── Computadora -->
+    <polyline points="300,870 640,870 640,600 1175,600" class="rel r-aggr" marker-start="url(#diam-e)"/>
+    <text x="305" y="862" class="rcard">N</text>
+    <text x="1143" y="595" class="rcard">0..1</text>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         RELATIONSHIPS — ASOCIACIÓN
+    ═══════════════════════════════════════════════════════ -->
+    <!-- Estudiante ──→ Reserva (realiza) -->
+    <polyline points="427,701 427,730 170,730 170,750" class="rel r-assoc" marker-end="url(#arr-b)"/>
+    <text x="200" y="726" class="rcard">1</text>
+    <text x="158" y="748" class="rcard">N</text>
+    <text x="208" y="742" class="rname">realiza</text>
+
+    <!-- Profesor ──→ Reserva -->
+    <polyline points="710,714 710,742 200,742 200,750" class="rel r-assoc" marker-end="url(#arr-b)"/>
+
+    <!-- Estudiante ──→ Prestamo -->
+    <polyline points="505,810 540,810 540,780 460,780 460,750" class="rel r-assoc" marker-end="url(#arr-b)"/>
+    <text x="468" y="775" class="rcard">N</text>
+    <text x="510" y="805" class="rcard">1</text>
+    <text x="470" y="795" class="rname">solicita</text>
+
+    <!-- Profesor ──→ Prestamo -->
+    <polyline points="710,730 710,760 490,760 490,750" class="rel r-assoc" marker-end="url(#arr-b)"/>
+
+    <!-- Computadora ──→ Prestamo (prestada_en) -->
+    <polyline points="1175,650 900,650 900,900 615,900" class="rel r-assoc" marker-end="url(#arr-b)"/>
+    <text x="640" y="895" class="rcard">N</text>
+    <text x="1152" y="643" class="rcard">1</text>
+    <text x="840" y="644" class="rname">prestada_en</text>
+
+    <!-- Reserva ──→ Prestamo (origina) -->
+    <polyline points="300,900 350,900" class="rel r-assoc" marker-end="url(#arr-b)"/>
+    <text x="302" y="894" class="rcard">0..1</text>
+    <text x="320" y="912" class="rname">origina</text>
+
+    <!-- Prestamo ──→ Multa (genera) -->
+    <polyline points="615,940 670,940" class="rel r-assoc" marker-end="url(#arr-b)"/>
+    <text x="617" y="934" class="rcard">1</text>
+    <text x="648" y="952" class="rname">genera</text>
+
+    <!-- Estudiante ──→ Multa (acumula) -->
+    <polyline points="427,701 427,720 768,720 768,750" class="rel r-assoc" marker-end="url(#arr-b)"/>
+    <text x="430" y="716" class="rcard">1</text>
+    <text x="756" y="748" class="rcard">N</text>
+    <text x="580" y="715" class="rname">acumula</text>
+
+    <!-- Profesor ──→ Multa (acumula cond.) -->
+    <polyline points="710,714 795,714 795,750" class="rel r-assoc" style="stroke-dasharray:5,3" marker-end="url(#arr-b)"/>
+    <text x="718" y="710" class="rname">(cond.)</text>
+
+    <!-- Empleado ──→ Prestamo (registra) -->
+    <polyline points="240,520 290,520 290,770 350,770" class="rel r-assoc" marker-end="url(#arr-b)"/>
+    <text x="250" y="515" class="rcard">1</text>
+    <text x="352" y="765" class="rcard">N</text>
+    <text x="242" y="650" class="rname" transform="rotate(-90,242,650)">registra</text>
+
+    <!-- Empleado ──→ Multa (aplica_por) -->
+    <polyline points="270,450 650,450 650,750" class="rel r-assoc" style="stroke-dasharray:5,3" marker-end="url(#arr-b)"/>
+    <text x="420" y="445" class="rname">aplica (opcional)</text>
+
+    <!-- all entities ──→ Auditoria (log) -->
+    <polyline points="240,490 975,490 975,796" class="rel r-assoc" style="stroke:#505050;stroke-dasharray:3,3" marker-end="url(#arr-b)"/>
+    <text x="550" y="484" class="rname" fill="#505050">audita →</text>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         RELATIONSHIPS — DEPENDENCIA (Services → Entities)
+    ═══════════════════════════════════════════════════════ -->
+    <polyline points="150,1190 150,1160 155,1160 155,720" class="rel r-dep" marker-end="url(#arr-p)"/>
+    <polyline points="402,1190 402,1160 427,1160 427,701" class="rel r-dep" marker-end="url(#arr-p)"/>
+    <polyline points="657,1190 657,1160 710,1160 710,714" class="rel r-dep" marker-end="url(#arr-p)"/>
+    <polyline points="915,1190 915,1160 1000,1160 1000,701" class="rel r-dep" marker-end="url(#arr-p)"/>
+    <polyline points="1182,1190 1182,1160 1297,1160 1297,701" class="rel r-dep" marker-end="url(#arr-p)"/>
+    <polyline points="1460,1190 1460,1140 170,1140 170,1134" class="rel r-dep" marker-end="url(#arr-p)"/>
+    <polyline points="1735,1190 1735,1145 482,1145 482,1160" class="rel r-dep" marker-end="url(#arr-p)"/>
+    <polyline points="2010,1190 2010,1150 795,1150 795,1108" class="rel r-dep" marker-end="url(#arr-p)"/>
+    <polyline points="2280,1190 2280,1155 1100,1155 1100,1068" class="rel r-dep" marker-end="url(#arr-p)"/>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         RELATIONSHIPS — DEPENDENCIA (Controllers → Services)
+    ═══════════════════════════════════════════════════════ -->
+    <line x1="150" y1="1530" x2="150" y2="1460" class="rel r-dep" marker-end="url(#arr-p)"/>
+    <line x1="402" y1="1530" x2="402" y2="1460" class="rel r-dep" marker-end="url(#arr-p)"/>
+    <line x1="657" y1="1530" x2="657" y2="1460" class="rel r-dep" marker-end="url(#arr-p)"/>
+    <line x1="915" y1="1530" x2="915" y2="1460" class="rel r-dep" marker-end="url(#arr-p)"/>
+    <line x1="1182" y1="1530" x2="1182" y2="1460" class="rel r-dep" marker-end="url(#arr-p)"/>
+    <line x1="1460" y1="1530" x2="1460" y2="1460" class="rel r-dep" marker-end="url(#arr-p)"/>
+    <line x1="1735" y1="1530" x2="1735" y2="1460" class="rel r-dep" marker-end="url(#arr-p)"/>
+
+    <!-- Auth -->
+    <polyline points="395,1760 395,1740 150,1740 150,1708" class="rel r-dep" marker-end="url(#arr-p)"/>
+    <line x1="505" y1="1869" x2="540" y2="1869" class="rel r-dep" marker-end="url(#arr-p)"/>
+
+    <!-- ICrudService implementations (dashed up from services) -->
+    <polyline points="150,1190 150,130 1295,130 1295,158" class="rel r-impl" style="opacity:0.25" marker-end="url(#tri-g)"/>
+
+  </svg>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<div class="controls">
+  <button class="ctrl-btn" id="zin" title="Acercar">+</button>
+  <button class="ctrl-btn" id="zout" title="Alejar">−</button>
+  <button class="ctrl-btn" id="zfit" title="Ajustar" style="font-size:0.65rem">FIT</button>
+  <button class="ctrl-btn" id="zreset" title="100%" style="font-size:0.65rem">1:1</button>
+</div>
+
+<script>
+  const wrap = document.getElementById('canvas-wrap');
+  const svg  = document.getElementById('diagram');
+  let scale = 0.48, ox = 60, oy = 20;
+  let dragging = false, sx = 0, sy = 0, sox = 0, soy = 0;
+
+  function applyTransform() {
+    svg.style.transform = `translate(${ox}px,${oy}px) scale(${scale})`;
+  }
+  applyTransform();
+
+  wrap.addEventListener('wheel', e => {
+    e.preventDefault();
+    const rect = wrap.getBoundingClientRect();
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    const delta = e.deltaY < 0 ? 1.1 : 0.9;
+    ox = mx - (mx - ox) * delta;
+    oy = my - (my - oy) * delta;
+    scale = Math.min(3, Math.max(0.1, scale * delta));
+    applyTransform();
+  }, {passive: false});
+
+  wrap.addEventListener('mousedown', e => {
+    if(e.button !== 0) return;
+    dragging = true; sx = e.clientX; sy = e.clientY;
+    sox = ox; soy = oy;
+  });
+  window.addEventListener('mousemove', e => {
+    if(!dragging) return;
+    ox = sox + (e.clientX - sx);
+    oy = soy + (e.clientY - sy);
+    applyTransform();
+  });
+  window.addEventListener('mouseup', () => dragging = false);
+
+  document.getElementById('zin').onclick = () => {
+    scale = Math.min(3, scale * 1.2);
+    applyTransform();
+  };
+  document.getElementById('zout').onclick = () => {
+    scale = Math.max(0.1, scale / 1.2);
+    applyTransform();
+  };
+  document.getElementById('zfit').onclick = () => {
+    scale = 0.48; ox = 60; oy = 20; applyTransform();
+  };
+  document.getElementById('zreset').onclick = () => {
+    scale = 1; ox = 0; oy = 0; applyTransform();
+  };
+
+  // Touch support
+  let lastDist = 0, lox = 0, loy = 0, ltx = 0, lty = 0;
+  wrap.addEventListener('touchstart', e => {
+    if(e.touches.length === 2) {
+      lastDist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX,
+              e.touches[0].clientY-e.touches[1].clientY);
+    } else if(e.touches.length === 1) {
+      dragging = true; sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+      sox = ox; soy = oy;
+    }
+  }, {passive:true});
+  wrap.addEventListener('touchmove', e => {
+    if(e.touches.length === 2) {
+      e.preventDefault();
+      const d = Math.hypot(e.touches[0].clientX-e.touches[1].clientX,
+              e.touches[0].clientY-e.touches[1].clientY);
+      scale = Math.min(3, Math.max(0.1, scale * d / lastDist));
+      lastDist = d; applyTransform();
+    } else if(dragging && e.touches.length === 1) {
+      ox = sox + (e.touches[0].clientX - sx);
+      oy = soy + (e.touches[0].clientY - sy);
+      applyTransform();
+    }
+  }, {passive:false});
+  wrap.addEventListener('touchend', () => { dragging = false; });
+</script>
+</body>
+</html>
