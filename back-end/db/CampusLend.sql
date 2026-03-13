@@ -608,6 +608,8 @@ ALTER TABLE reservation
         FOREIGN KEY (status_id) REFERENCES reservation_status_type(status_id);
 
 
+
+
   -- Validaciones de fechas
 ALTER TABLE loan
     ADD CONSTRAINT check_expected_return
