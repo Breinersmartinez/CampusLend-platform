@@ -13,9 +13,9 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";  -- UUID alternative
 
 
 
---------------------------
+   
 -- 3. TABLAS DE REFERENCIA (Catálogos)
---------------------------
+   
 
 -- 3.1 Roles de empleados
 CREATE TABLE role_type (
@@ -253,9 +253,9 @@ INSERT INTO audit_action_type (action_name, description) VALUES
 
 COMMENT ON TABLE audit_action_type IS 'Reference table for audit action types';
 
---------------------------
+   
 -- 4. TABLAS PRINCIPALES
---------------------------
+   
 
 -- 4.1 EMPLEADO
 CREATE TABLE employee (
@@ -503,9 +503,9 @@ CREATE TABLE audit (
 COMMENT ON TABLE  audit              IS 'Immutable log of all critical system operations. Never updated or deleted';
 COMMENT ON COLUMN audit.professor_id IS 'Populated when the audited action was performed by a professor';
 
--- --------------------------
+--    
 -- 5. Llaves foraneas (fk)
--- --------------------------
+--    
 
 ALTER TABLE employee
     ADD CONSTRAINT check_employee_email
@@ -692,9 +692,9 @@ ALTER TABLE audit
 
 
 
--- --------------------------
+--    
 -- 5. indices (indexs)
--- --------------------------
+--    
 
 CREATE INDEX idx_employee_email    ON employee(institutional_email);
 CREATE INDEX idx_employee_card_id  ON employee(card_id);
@@ -772,9 +772,9 @@ CREATE INDEX idx_audit_search    ON audit(affected_table, action_id, date_time D
 
 
 
--- --------------------------
+--    
 -- 6. VISTAS (VIEWS)
--- --------------------------
+--    
 
 -- 6.1 Computadoras disponibles
 CREATE OR REPLACE VIEW v_computers_available AS
