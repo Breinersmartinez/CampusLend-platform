@@ -15,10 +15,12 @@ public class User {
     private UUID id;
     private String firstname;
     private String lastName;
+    private String email;
     private String password;
     @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
     private Role role;
+    private Date creat
 
     // UserDetails methods and other getters/setters
 }
