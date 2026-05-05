@@ -10,6 +10,6 @@ public interface UserService {
 
     User findById(UUID id);
 
-    Void delete(UUID id);
+    void delete(UUID id);
 
 }
