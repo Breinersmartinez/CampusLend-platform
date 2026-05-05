@@ -1,5 +1,4 @@
-package com.example.demo.config.webConfiguration;
-
+package com.example.demo.config.infrastructure;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -10,8 +9,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import java.util.*;
 
 @Configuration
-public class CorsConfig {
-
+public class ApplicationConfig {
     // Configuraciones CORS
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

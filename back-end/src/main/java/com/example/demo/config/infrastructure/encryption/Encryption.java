@@ -1,4 +1,4 @@
-package com.example.demo.config.encryption;
+package com.example.demo.config.infrastructure.encryption;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
