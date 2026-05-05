@@ -1,14 +1,20 @@
 package com.example.demo.user.infrastructure.entity;
 
+
 import com.example.demo.user.domain.Role;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -23,19 +29,27 @@ public class UserEntity implements UserDetails {
     private String idCard;
     private String firstname;
     private String lastName;
+
     @Column(unique = true)
     private String email;
+
     private String password;
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
+
     @Enumerated(EnumType.STRING)
     private Role role;
+
     private Date created_at;
     private Date updated_at;
+
 
     @Override
     public String getUsername() {
         return email;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override

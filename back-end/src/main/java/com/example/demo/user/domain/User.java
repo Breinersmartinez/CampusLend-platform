@@ -10,8 +10,6 @@ import java.util.UUID;
 
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class User {
 
     private UUID id;
@@ -20,8 +18,6 @@ public class User {
     private String lastName;
     private String email;
     private String password;
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
     private Role role;
     private Date created_at;
     private Date updated_at;

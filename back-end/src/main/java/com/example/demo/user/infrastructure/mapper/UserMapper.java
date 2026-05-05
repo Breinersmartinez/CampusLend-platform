@@ -11,7 +11,7 @@ import org.mapstruct.MappingConstants;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface UserMapper {
 
-    User UserEntityToUser(UserEntity userEntity);
+    User userEntityToUser(UserEntity userEntity);
 
     UserEntity userToUserEntity(User user);
 

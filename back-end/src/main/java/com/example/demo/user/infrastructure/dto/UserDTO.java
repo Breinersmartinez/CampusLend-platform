@@ -2,13 +2,13 @@ package com.example.demo.user.infrastructure.dto;
 
 import com.example.demo.user.domain.Role;
 import com.example.demo.user.infrastructure.annotation.MaskData;
-import jakarta.persistence.*;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
 import java.util.UUID;
 
 @Data
@@ -25,7 +25,7 @@ public class UserDTO {
     @MaskData
     private String email;
 
-   @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     private Role role;
 
 

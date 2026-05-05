@@ -13,29 +13,23 @@
 		<relativePath/>
 	</parent>
 
-	<groupId>com.example</groupId>
-	<artifactId>demo</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-
+	<groupId>com.ucc</groupId>
+	<artifactId>campuslend</artifactId>
+	<version>1.0.0</version>
 	<name>CampusLend</name>
-	<description>CampusLend Backend</description>
+	<description>Sistema de préstamos y reservas UCC - Arquitectura Hexagonal</description>
 
 	<properties>
-
 		<java.version>21</java.version>
-
 		<mapstruct.version>1.5.5.Final</mapstruct.version>
 		<jjwt.version>0.11.5</jjwt.version>
 		<springdoc.version>2.6.0</springdoc.version>
 		<loki4j.version>1.6.0</loki4j.version>
-
 	</properties>
 
 	<dependencies>
 
-		
-		<!-- SPRING -->
-		
+		<!--  SPRING  -->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -67,9 +61,7 @@
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
-		
-		<!-- DATABASE -->
-		
+		<!--  DATABASE  -->
 
 		<dependency>
 			<groupId>org.postgresql</groupId>
@@ -77,9 +69,7 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		
-		<!-- JWT -->
-		
+		<!--  JWT  -->
 
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
@@ -101,9 +91,7 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		
-		<!-- MAPSTRUCT -->
-		
+		<!--  MAPSTRUCT  -->
 
 		<dependency>
 			<groupId>org.mapstruct</groupId>
@@ -111,9 +99,7 @@
 			<version>${mapstruct.version}</version>
 		</dependency>
 
-		
-		<!-- LOMBOK -->
-		
+		<!--  LOMBOK  -->
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -121,9 +107,7 @@
 			<optional>true</optional>
 		</dependency>
 
-		
-		<!-- SWAGGER -->
-		
+		<!--  SWAGGER / OPENAPI  -->
 
 		<dependency>
 			<groupId>org.springdoc</groupId>
@@ -131,9 +115,7 @@
 			<version>${springdoc.version}</version>
 		</dependency>
 
-		
-		<!-- OBSERVABILITY -->
-		
+		<!--  OBSERVABILITY (Prometheus + Tracing)  -->
 
 		<dependency>
 			<groupId>io.micrometer</groupId>
@@ -151,9 +133,7 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		
-		<!-- LOGGING -->
-		
+		<!--  LOGGING (Loki)  -->
 
 		<dependency>
 			<groupId>com.github.loki4j</groupId>
@@ -161,9 +141,7 @@
 			<version>${loki4j.version}</version>
 		</dependency>
 
-		
-		<!-- DEVTOOLS -->
-		
+		<!--  DEVTOOLS  -->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -172,9 +150,7 @@
 			<optional>true</optional>
 		</dependency>
 
-		
-		<!-- TEST -->
-		
+		<!--  TEST  -->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -191,63 +167,45 @@
 	</dependencies>
 
 	<build>
-
 		<plugins>
 
-			<!-- Compiler -->
-
+			<!--  COMPILER (Lombok + MapStruct annotation processors)  -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-
 				<configuration>
-
 					<source>${java.version}</source>
 					<target>${java.version}</target>
-
 					<annotationProcessorPaths>
-
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
 							<version>1.18.34</version>
 						</path>
-
 						<path>
 							<groupId>org.mapstruct</groupId>
 							<artifactId>mapstruct-processor</artifactId>
 							<version>${mapstruct.version}</version>
 						</path>
-
 					</annotationProcessorPaths>
-
 				</configuration>
-
 			</plugin>
 
-			<!-- Spring Boot -->
-
+			<!--  SPRING BOOT  -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-
 				<configuration>
-
 					<excludes>
-
 						<exclude>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
 						</exclude>
-
 					</excludes>
-
 				</configuration>
-
 			</plugin>
 
 		</plugins>
-
 	</build>
 
 </project>
