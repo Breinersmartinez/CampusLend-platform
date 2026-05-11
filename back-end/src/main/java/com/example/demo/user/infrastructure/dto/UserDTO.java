@@ -19,7 +19,7 @@ public class UserDTO {
 
     private UUID id;
     private String idCard;
-    private String firstname;
+    private String firstName;
     private String lastName;
 
     @MaskData

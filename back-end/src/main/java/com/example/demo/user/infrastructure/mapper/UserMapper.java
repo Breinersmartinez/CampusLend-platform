@@ -19,6 +19,5 @@ public interface UserMapper {
 
     User userDTOTOUser(UserDTO userDTO);
 
-    User registerRequestTouser(RegisterRequest registerRequest);
-
+    User registerRequestToUser(RegisterRequest registerRequest);
 }
