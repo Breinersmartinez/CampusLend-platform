@@ -27,7 +27,10 @@ public class UserEntity implements UserDetails {
     @Id
     private UUID id;
     private String idCard;
-    private String firstname;
+    @Column (name = "first_name")
+    private String firstName;
+
+    @Column (name = "last_name")
     private String lastName;
 
     @Column(unique = true)
