@@ -1,0 +1,61 @@
+<mxfile host="app.diagrams.net" version="29.6.1">
+  <diagram name="Backend Class Diagram" id="backend-class-diagram">
+    <mxGraphModel dx="1220" dy="760" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="user-domain" value="&lt;b&gt;user.domain&lt;/b&gt;&lt;hr&gt;User&lt;br&gt;Role&lt;br&gt;UserService&lt;br&gt;UserRepository" style="swimlane;whiteSpace=wrap;html=1;rounded=0;startSize=28;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="80" y="80" width="220" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="user-app" value="&lt;b&gt;user.application&lt;/b&gt;&lt;hr&gt;UserServiceImpl" style="swimlane;whiteSpace=wrap;html=1;rounded=0;startSize=28;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="380" y="95" width="220" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="user-infra" value="&lt;b&gt;user.infrastructure&lt;/b&gt;&lt;hr&gt;UserController / Impl&lt;br&gt;UserDTO&lt;br&gt;UserEntity&lt;br&gt;UserMapper&lt;br&gt;PostgresqlUserRepository&lt;br&gt;SpringUserRepository" style="swimlane;whiteSpace=wrap;html=1;rounded=0;startSize=28;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="680" y="70" width="270" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="role-domain" value="&lt;b&gt;role.domain&lt;/b&gt;&lt;hr&gt;Role&lt;br&gt;RoleService&lt;br&gt;RoleRepository" style="swimlane;whiteSpace=wrap;html=1;rounded=0;startSize=28;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="80" y="330" width="220" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="role-app" value="&lt;b&gt;role.application&lt;/b&gt;&lt;hr&gt;RoleServiceImpl" style="swimlane;whiteSpace=wrap;html=1;rounded=0;startSize=28;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="380" y="335" width="220" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="auth" value="&lt;b&gt;auth&lt;/b&gt;&lt;hr&gt;AuthenticationService&lt;br&gt;AuthenticationController&lt;br&gt;AuthenticationRequest&lt;br&gt;AuthenticationResponse&lt;br&gt;RegisterRequest" style="swimlane;whiteSpace=wrap;html=1;rounded=0;startSize=28;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="680" y="330" width="270" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="config" value="&lt;b&gt;config&lt;/b&gt;&lt;hr&gt;JwtService&lt;br&gt;SecurityConfig&lt;br&gt;JwtAuthFilter&lt;br&gt;ApplicationConfig&lt;br&gt;AuthenticationConfig&lt;br&gt;OpenAPIConfig&lt;br&gt;Encryption" style="swimlane;whiteSpace=wrap;html=1;rounded=0;startSize=28;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="80" y="550" width="270" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="exceptions" value="&lt;b&gt;exception&lt;/b&gt;&lt;hr&gt;ApiExceptionHandler&lt;br&gt;BadRequestException&lt;br&gt;InvalidTokenException&lt;br&gt;MalformedHeaderException&lt;br&gt;NotFoundException&lt;br&gt;ErrorMessage" style="swimlane;whiteSpace=wrap;html=1;rounded=0;startSize=28;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="420" y="555" width="250" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="app" value="&lt;b&gt;CampusLendApplication&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="740" y="610" width="210" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-user-app-domain" value="implements / uses" style="endArrow=block;html=1;rounded=0;strokeColor=#666666;" edge="1" parent="1" source="user-app" target="user-domain">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-user-infra-app" value="calls" style="endArrow=block;html=1;rounded=0;strokeColor=#666666;" edge="1" parent="1" source="user-infra" target="user-app">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-user-infra-domain" value="persists / maps" style="endArrow=block;html=1;rounded=0;strokeColor=#666666;" edge="1" parent="1" source="user-infra" target="user-domain">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-role-app-domain" value="implements / uses" style="endArrow=block;html=1;rounded=0;strokeColor=#666666;" edge="1" parent="1" source="role-app" target="role-domain">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-auth-user" value="authenticates" style="endArrow=block;html=1;rounded=0;strokeColor=#666666;" edge="1" parent="1" source="auth" target="user-app">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-auth-config" value="JWT / security" style="endArrow=block;html=1;rounded=0;strokeColor=#666666;" edge="1" parent="1" source="auth" target="config">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-config-user" value="loads users" style="endArrow=block;html=1;rounded=0;strokeColor=#666666;" edge="1" parent="1" source="config" target="user-domain">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-exceptions-auth" value="handles errors" style="endArrow=block;html=1;rounded=0;strokeColor=#666666;" edge="1" parent="1" source="exceptions" target="auth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
